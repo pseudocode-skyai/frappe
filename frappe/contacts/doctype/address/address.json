@@ -12,12 +12,12 @@
   "address_type",
   "address_line1",
   "address_line2",
-  "city",
   "county",
   "state",
   "country",
-  "pincode",
   "column_break0",
+  "city",
+  "pincode",
   "email_id",
   "phone",
   "fax",
@@ -36,6 +36,7 @@
   {
    "fieldname": "address_title",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Address Title"
   },
   {
@@ -70,6 +71,7 @@
   {
    "fieldname": "county",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "County"
   },
   {
@@ -90,7 +92,7 @@
   {
    "fieldname": "pincode",
    "fieldtype": "Data",
-   "label": "Postal Code",
+   "label": "Zip Code",
    "search_index": 1
   },
   {
@@ -112,24 +114,28 @@
   {
    "fieldname": "fax",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Fax"
   },
   {
    "default": "0",
    "fieldname": "is_primary_address",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Preferred Billing Address"
   },
   {
    "default": "0",
    "fieldname": "is_shipping_address",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Preferred Shipping Address"
   },
   {
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Disabled"
   },
   {
@@ -145,10 +151,11 @@
    "options": "Dynamic Link"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2020-10-21 16:14:37.284830",
+ "modified": "2022-07-18 07:33:45.484494",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Address",
