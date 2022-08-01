@@ -1314,7 +1314,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 
 	report_menu_items() {
 		let items = [
-			{
+			/* {
 				label: __('Show Totals'),
 				action: () => {
 					this.add_totals_row = !this.add_totals_row;
@@ -1323,7 +1323,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 					});
 					this.datatable.refresh(this.get_data(this.data));
 				}
-			},
+			}, */
 			{
 				label: __('Print'),
 				action: () => {
@@ -1353,16 +1353,16 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 					});
 				}
 			},
-			{
+			/* {
 				label: __('Toggle Chart'),
 				action: () => this.toggle_charts()
-			},
-			{
+			}, */
+			/* {
 				label: __('Toggle Sidebar'),
 				action: () => this.toggle_side_bar(),
 				shortcut: 'Ctrl+K',
-			},
-			{
+			}, */
+			/* {
 				label: __('Pick Columns'),
 				action: () => {
 					const d = new frappe.ui.Dialog({
@@ -1404,7 +1404,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 					frappe.utils.setup_search(d.$body, '.unit-checkbox', '.label-area');
 					d.show();
 				}
-			}
+			} */
 		];
 
 		if (frappe.model.can_export(this.doctype)) {
@@ -1467,7 +1467,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 			});
 		}
 
-		items.push({
+		/* items.push({
 			label: __("Setup Auto Email"),
 			action: () => {
 				if(this.report_name) {
@@ -1476,9 +1476,9 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 					frappe.msgprint(__('Please save the report first'));
 				}
 			}
-		});
+		}); */
 
-		const can_edit_or_delete = (action) => {
+		/* const can_edit_or_delete = (action) => {
 			const method = action == "delete" ? "can_delete" : "can_write";
 			return (
 				this.report_doc
@@ -1488,24 +1488,24 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 					|| this.report_doc.owner === frappe.session.user
 				)
 			);
-		};
+		}; */
 
 		// A user with role Report Manager or Report Owner can save
-		if (can_edit_or_delete()) {
+		/* if (can_edit_or_delete()) {
 			items.push({
 				label: __("Save"),
 				action: () => this.save_report('save')
 			});
-		}
+		} */
 
 		// anyone can save as
-		items.push({
+		/* items.push({
 			label: __('Save As'),
 			action: () => this.save_report('save_as')
-		});
+		}); */
 
 		// A user with role Report Manager or Report Owner can delete
-		if (can_edit_or_delete("delete")) {
+		/* if (can_edit_or_delete("delete")) {
 			items.push({
 				label: __("Delete"),
 				action: () => frappe.confirm(
@@ -1514,10 +1514,10 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 				),
 				shortcut: "Shift+Ctrl+D"
 			});
-		}
+		} */
 
 		// user permissions
-		if(this.report_name && frappe.model.can_set_user_permissions("Report")) {
+		/* if(this.report_name && frappe.model.can_set_user_permissions("Report")) {
 			items.push({
 				label: __("User Permissions"),
 				action: () => {
@@ -1528,7 +1528,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 					frappe.set_route('List', 'User Permission', args);
 				}
 			});
-		}
+		} */
 
 		return items.map(i => Object.assign(i, { standard: true }));
 	}
