@@ -147,13 +147,13 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 	}
 
 	add_card_button_to_toolbar() {
-		this.page.add_inner_button(__("Create Card"), () => {
+		/* this.page.add_inner_button(__("Create Card"), () => {
 			this.add_card_to_dashboard();
-		});
+		}); */
 	}
 
 	add_chart_buttons_to_toolbar(show) {
-		if (show) {
+		/* if (show) {
 			this.create_chart_button && this.create_chart_button.remove();
 			this.create_chart_button = this.page.add_button(__("Set Chart"), () => {
 				this.open_create_chart_dialog();
@@ -168,7 +168,7 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 		} else {
 			this.create_chart_button && this.create_chart_button.remove();
 			this.add_to_dashboard_button && this.add_to_dashboard_button.remove();
-		}
+		} */
 	}
 
 	add_card_to_dashboard() {
@@ -1445,12 +1445,12 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 				action: () => this.refresh(),
 				class: 'visible-xs'
 			},
-			{
+			/* {
 				label: __('Edit'),
 				action: () => frappe.set_route('Form', 'Report', this.report_name),
 				condition: () => frappe.user.is_report_manager(),
 				standard: true
-			},
+			}, */
 			{
 				label: __('Print'),
 				action: () => {
@@ -1486,12 +1486,12 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 				condition: () => frappe.model.can_export(this.report_doc.ref_doctype),
 				standard: true
 			},
-			{
+			/* {
 				label: __('Setup Auto Email'),
 				action: () => frappe.set_route('List', 'Auto Email Report', {'report' : this.report_name}),
 				standard: true
-			},
-			{
+			}, */
+			/* {
 				label: __('Add Column'),
 				action: () => {
 					let d = new frappe.ui.Dialog({
@@ -1577,8 +1577,8 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 					d.show();
 				},
 				standard: true
-			},
-			{
+			}, */
+			/* {
 				label: __('User Permissions'),
 				action: () => frappe.set_route('List', 'User Permission', {
 					doctype: 'Report',
@@ -1586,11 +1586,11 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 				}),
 				condition: () => frappe.model.can_set_user_permissions('Report'),
 				standard: true
-			}
+			} */
 		];
 
 		if (frappe.user.is_report_manager()) {
-			items.push({
+			/* items.push({
 				label: __('Save'),
 				action: () => {
 					let d = new frappe.ui.Dialog({
@@ -1623,7 +1623,7 @@ frappe.views.QueryReport = class QueryReport extends frappe.views.BaseList {
 					d.show();
 				},
 				standard: true
-			})
+			}) */
 		}
 
 		return items;
