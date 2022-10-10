@@ -1775,11 +1775,11 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		}
 
 		// bulk assignment
-		actions_menu_items.push(bulk_assignment());
+		// actions_menu_items.push(bulk_assignment());
 
-		actions_menu_items.push(bulk_assignment_rule());
+		// actions_menu_items.push(bulk_assignment_rule());
 
-		actions_menu_items.push(bulk_add_tags());
+		// actions_menu_items.push(bulk_add_tags());
 
 		// bulk printing
 		if (frappe.model.can_print(doctype)) {

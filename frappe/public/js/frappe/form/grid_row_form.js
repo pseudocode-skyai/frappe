@@ -44,7 +44,7 @@ export default class GridRowForm {
 			let template = `<div class="grid-form-heading">
 				<div class="toolbar grid-header-toolbar">
 					<span class="panel-title">
-						${ __("Editing Row") } #<span class="grid-form-row-index"></span></span>
+						${ __("View / Editing Row") } #<span class="grid-form-row-index"></span></span>
 					<span class="row-actions">
 						<button class="btn btn-secondary btn-sm pull-right grid-collapse-row">
 							${frappe.utils.icon('down')}
