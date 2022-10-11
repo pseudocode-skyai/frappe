@@ -711,7 +711,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		const fieldname = df.fieldname;
 		const value = doc[fieldname] || "";
 
-		const format = () => {
+		/* const format = () => {
 			if (df.fieldtype === "Code") {
 				return value;
 			} else if (df.fieldtype === "Percent") {
@@ -722,6 +722,15 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 						</div>
 					</div>`;
 			} else {
+				return frappe.format(value, df, null, doc);
+			}
+		};
+ */
+        //Remove % bar from customer order list view and show value.
+		const format = () => {
+			if (df.fieldtype === "Code") {
+				return value;
+			}else {
 				return frappe.format(value, df, null, doc);
 			}
 		};
@@ -1775,11 +1784,11 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		}
 
 		// bulk assignment
-		actions_menu_items.push(bulk_assignment());
+		// actions_menu_items.push(bulk_assignment());
 
-		actions_menu_items.push(bulk_assignment_rule());
+		// actions_menu_items.push(bulk_assignment_rule());
 
-		actions_menu_items.push(bulk_add_tags());
+		// actions_menu_items.push(bulk_add_tags());
 
 		// bulk printing
 		if (frappe.model.can_print(doctype)) {

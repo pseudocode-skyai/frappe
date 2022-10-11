@@ -361,7 +361,7 @@ $.extend(frappe.model, {
 		if (opts.frm && opts.frm.doc.__unsaved) {
 			frappe.throw(
 				__(
-					"You have unsaved changes in this form. Please save before you continue."
+					"You have unsaved changes in this form. Please Save/Update before you continue."
 				)
 			);
 		} else if (!opts.source_name && opts.frm) {
