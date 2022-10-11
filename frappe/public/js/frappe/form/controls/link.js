@@ -196,34 +196,35 @@ frappe.ui.form.ControlLink = frappe.ui.form.ControlData.extend({
 						}
 					}
 
-					if(!me.df.only_select) {
-						if(frappe.model.can_create(doctype)) {
-							// new item
-							r.results.push({
-								html: "<span class='text-primary link-option'>"
-									+ "<i class='fa fa-plus' style='margin-right: 5px;'></i> "
-									+ __("Create a new {0}", [__(me.get_options())])
-									+ "</span>",
-								label: __("Create a new {0}", [__(me.get_options())]),
-								value: "create_new__link_option",
-								action: me.new_doc
-							});
-						}
-						// advanced search
+					// if(!me.df.only_select) {
+					//   //following if use for create option in select list for link field
+					// 	if(frappe.model.can_create(doctype)) {
+					// 		// new item
+					// 		r.results.push({
+					// 			html: "<span class='text-primary link-option'>"
+					// 				+ "<i class='fa fa-plus' style='margin-right: 5px;'></i> "
+					// 				+ __("Create a new {0}", [__(me.get_options())])
+					// 				+ "</span>",
+					// 			label: __("Create a new {0}", [__(me.get_options())]),
+					// 			value: "create_new__link_option",
+					// 			action: me.new_doc
+					// 		});
+					// 	}
+					// 	// advanced search
 
-						if (locals && locals['DocType']) {
-							// not applicable in web forms
-							r.results.push({
-								html: "<span class='text-primary link-option'>"
-									+ "<i class='fa fa-search' style='margin-right: 5px;'></i> "
-									+ __("Advanced Search")
-									+ "</span>",
-								label: __("Advanced Search"),
-								value: "advanced_search__link_option",
-								action: me.open_advanced_search
-							});
-						}
-					}
+					// 	if (locals && locals['DocType']) {
+					// 		// not applicable in web forms
+					// 		r.results.push({
+					// 			html: "<span class='text-primary link-option'>"
+					// 				+ "<i class='fa fa-search' style='margin-right: 5px;'></i> "
+					// 				+ __("Advanced Search")
+					// 				+ "</span>",
+					// 			label: __("Advanced Search"),
+					// 			value: "advanced_search__link_option",
+					// 			action: me.open_advanced_search
+					// 		});
+					// 	}
+					// }
 					me.$input.cache[doctype][term] = r.results;
 					me.awesomplete.list = me.$input.cache[doctype][term];
 					me.toggle_href(doctype);
