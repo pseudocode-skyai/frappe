@@ -363,6 +363,7 @@
       "depends_on": "enabled",
       "fieldname": "email_settings",
       "fieldtype": "Section Break",
+      "hidden": 1,
       "label": "Email"
      },
      {
@@ -450,6 +451,7 @@
       "depends_on": "enabled",
       "fieldname": "sb3",
       "fieldtype": "Section Break",
+      "hidden": 1,
       "label": "Security Settings",
       "oldfieldtype": "Section Break",
       "read_only": 1
@@ -606,12 +608,14 @@
       "options": "Light\nDark"
      },
      {
+      "default": "Unizone Module",
       "fieldname": "module_profile",
       "fieldtype": "Link",
       "label": "Module Profile",
       "options": "Module Profile"
      }
     ],
+    "hide_toolbar": 1,
     "icon": "fa fa-user",
     "idx": 413,
     "image_field": "user_image",
@@ -672,7 +676,7 @@
       "link_fieldname": "user"
      }
     ],
-    "modified": "2022-05-24 01:01:35.431323",
+    "modified": "2022-10-07 00:04:43.610228",
     "modified_by": "Administrator",
     "module": "Core",
     "name": "User",
