@@ -269,35 +269,35 @@ frappe.ui.form.Toolbar = class Toolbar {
 		}
 
 		// go to field modal
-		this.page.add_menu_item(__("Jump to field"), function() {
+		/* this.page.add_menu_item(__("Jump to field"), function() {
 			me.show_jump_to_field_dialog();
-		}, true, 'Ctrl+J');
+		}, true, 'Ctrl+J'); */
 
 		// Linked With
-		if(!me.frm.meta.issingle) {
+		/* if(!me.frm.meta.issingle) {
 			this.page.add_menu_item(__('Links'), function() {
 				me.show_linked_with();
 			}, true)
-		}
+		} */
 
 		// duplicate
-		if(in_list(frappe.boot.user.can_create, me.frm.doctype) && !me.frm.meta.allow_copy) {
+		/* if(in_list(frappe.boot.user.can_create, me.frm.doctype) && !me.frm.meta.allow_copy) {
 			this.page.add_menu_item(__("Duplicate"), function() {
 				me.frm.copy_doc();
 			}, true);
-		}
+		} */
 
 		// copy doc to clipboard
-		this.page.add_menu_item(__("Copy to Clipboard"), function() {
+		/* this.page.add_menu_item(__("Copy to Clipboard"), function() {
 			frappe.utils.copy_to_clipboard(JSON.stringify(me.frm.doc));
-		}, true);
+		}, true); */
 
 		// rename
-		if(this.can_rename()) {
+		/* if(this.can_rename()) {
 			this.page.add_menu_item(__("Rename"), function() {
 				me.frm.rename_doc();
 			}, true);
-		}
+		} */
 
 		// reload
 		this.page.add_menu_item(__("Reload"), function() {
@@ -315,14 +315,14 @@ frappe.ui.form.Toolbar = class Toolbar {
 			});
 		}
 
-		this.make_customize_buttons();
+		// this.make_customize_buttons();
 
 		// Auto Repeat
-		if(this.can_repeat()) {
+		/* if(this.can_repeat()) {
 			this.page.add_menu_item(__("Repeat"), function(){
 				frappe.utils.new_auto_repeat_prompt(me.frm);
 			}, true);
-		}
+		} */
 
 		// New
 		if(p[CREATE] && !this.frm.meta.issingle) {

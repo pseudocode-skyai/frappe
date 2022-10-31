@@ -183,17 +183,17 @@ frappe.views.Workspace = class Workspace {
 	setup_dropdown() {
 		this.page.clear_menu();
 
-		this.page.set_secondary_action(__('Customize'), () => {
+		/* this.page.set_secondary_action(__('Customize'), () => {
 			this.customize();
-		});
+		}); */
 
-		this.page.add_menu_item(__('Reset Customizations'), () => {
+		/* this.page.add_menu_item(__('Reset Customizations'), () => {
 			this.current_page.reset_customization();
-		}, 1);
+		}, 1); */
 
-		this.page.add_menu_item(__('Toggle Sidebar'), () => {
+		/* this.page.add_menu_item(__('Toggle Sidebar'), () => {
 			this.toggle_side_bar();
-		}, 1);
+		}, 1); */
 	}
 
 	toggle_side_bar() {

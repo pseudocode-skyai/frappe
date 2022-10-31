@@ -101,21 +101,21 @@ frappe.ui.form.on('User', {
 		if(!frm.is_new()) {
 			if(has_access_to_edit_user()) {
 
-				frm.add_custom_button(__("Set User Permissions"), function() {
+/* 				frm.add_custom_button(__("Set User Permissions"), function() {
 					frappe.route_options = {
 						"user": doc.name
 					};
 					frappe.set_route('List', 'User Permission');
 				}, __("Permissions"));
-
-				frm.add_custom_button(__('View Permitted Documents'),
+ */
+/* 				frm.add_custom_button(__('View Permitted Documents'),
 					() => frappe.set_route('query-report', 'Permitted Documents For User',
-						{user: frm.doc.name}), __("Permissions"));
+						{user: frm.doc.name}), __("Permissions")); */
 
 				frm.toggle_display(['sb1', 'sb3', 'modules_access'], true);
 			}
 
-			frm.add_custom_button(__("Reset Password"), function() {
+/* 			frm.add_custom_button(__("Reset Password"), function() {
 				frappe.call({
 					method: "frappe.core.doctype.user.user.reset_password",
 					args: {
@@ -123,7 +123,7 @@ frappe.ui.form.on('User', {
 					}
 				});
 			}, __("Password"));
-
+ */
 			if (frappe.user.has_role("System Manager")) {
 				frappe.db.get_single_value("LDAP Settings", "enabled").then((value) => {
 					if (value === 1 && frm.doc.name != "Administrator") {
@@ -167,7 +167,7 @@ frappe.ui.form.on('User', {
 					}
 				});
 			}
-
+/* 
 			frm.add_custom_button(__("Reset OTP Secret"), function() {
 				frappe.call({
 					method: "frappe.twofactor.reset_otp_secret",
@@ -175,7 +175,7 @@ frappe.ui.form.on('User', {
 						"user": frm.doc.name
 					}
 				});
-			}, __("Password"));
+			}, __("Password")); */
 
 			frm.trigger('enabled');
 
@@ -200,11 +200,11 @@ frappe.ui.form.on('User', {
 					found = 1;
 				}
 			}
-			if (!found) {
+/* 			if (!found) {
 				frm.add_custom_button(__("Create User Email"), function() {
 					frm.events.create_user_email(frm);
 				});
-			}
+			} */
 		}
 
 		if (frappe.route_flags.unsaved===1){
@@ -214,7 +214,6 @@ frappe.ui.form.on('User', {
 			}
 			frm.dirty();
 		}
-
 	},
 	validate: function(frm) {
 		if(frm.roles_editor) {

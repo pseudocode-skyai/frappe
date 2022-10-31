@@ -396,7 +396,11 @@ def get_desk_sidebar_items():
 		filters["developer_mode_only"] = "0"
 
 	# pages sorted based on pinned to top and then by name
-	order_by = "pin_to_top desc, pin_to_bottom asc, name asc"
+	# ***** START SIDEBAR ORDER CHANGE ***** #
+	# order_by = "pin_to_top desc, pin_to_bottom asc, name asc"
+	order_by = "creation asc"
+	# ***** END SIDEBAR ORDER CHANGE ***** #
+
 	all_pages = frappe.get_all(
 		"Workspace",
 		fields=["name", "category", "icon", "module"],
