@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_import": 1,
- "allow_rename": 1,
  "creation": "2013-01-10 16:34:32",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -159,7 +158,7 @@
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2022-09-27 04:29:48.809401",
+ "modified": "2022-11-02 00:18:27.972281",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Address",
