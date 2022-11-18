@@ -403,6 +403,15 @@ export default class Grid {
 					this.wrapper.find('.grid-add-multiple-rows').removeClass('hidden');
 				}
 			}
+			// show, hide buttons to download
+			if (this.cannot_download || (this.df && this.df.cannot_download)) {
+				// add 'hidden' to buttons
+				this.wrapper.find('.grid-download')
+					.addClass('hidden');
+			} else {
+				// show buttons
+				this.wrapper.find('.grid-download').removeClass('hidden');
+			}
 		} else if (this.grid_rows.length < this.grid_pagination.page_length) {
 			this.wrapper.find('.grid-footer').toggle(false);
 		}
@@ -851,10 +860,10 @@ export default class Grid {
 					on_success(file) {
 						var data = frappe.utils.csv_to_array(frappe.utils.get_decoded_string(file.dataurl));
 						// row #2 contains fieldnames;
-						var fieldnames = data[2];
+						var fieldnames = data[4];
 						me.frm.clear_table(me.df.fieldname);
 						$.each(data, (i, row) => {
-							if (i > 6) {
+							if (i > 4) {
 								var blank_row = true;
 								$.each(row, function (ci, value) {
 									if (value) {
