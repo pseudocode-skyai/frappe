@@ -711,6 +711,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		const fieldname = df.fieldname;
 		const value = doc[fieldname] || "";
 
+		//Remove % bar from customer order list view and show value.
 		/* const format = () => {
 			if (df.fieldtype === "Code") {
 				return value;
@@ -724,13 +725,11 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 			} else {
 				return frappe.format(value, df, null, doc);
 			}
-		};
- */
-        //Remove % bar from customer order list view and show value.
+		}; */
 		const format = () => {
 			if (df.fieldtype === "Code") {
 				return value;
-			}else {
+			} else {
 				return frappe.format(value, df, null, doc);
 			}
 		};
@@ -1476,14 +1475,14 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		const items = [];
 
 		if (frappe.model.can_import(doctype)) {
-			items.push({
+			/* items.push({
 				label: __("Import", null, "Button in list view menu"),
 				action: () =>
 					frappe.set_route("list", "data-import", {
 						reference_doctype: doctype,
 					}),
 				standard: true,
-			});
+			}); */
 		}
 
 		if (frappe.model.can_set_user_permissions(doctype)) {
@@ -1779,9 +1778,9 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		};
 
 		// bulk edit
-		if (has_editable_fields(doctype)) {
+		/* if (has_editable_fields(doctype)) {
 			actions_menu_items.push(bulk_edit());
-		}
+		} */
 
 		// bulk assignment
 		// actions_menu_items.push(bulk_assignment());
@@ -1796,26 +1795,26 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		}
 
 		// bulk submit
-		if (
+		/* if (
 			frappe.model.is_submittable(doctype) &&
 			has_submit_permission(doctype) &&
 			!frappe.model.has_workflow(doctype)
 		) {
 			actions_menu_items.push(bulk_submit());
-		}
+		} */
 
 		// bulk cancel
-		if (
+		/* if (
 			frappe.model.can_cancel(doctype) &&
 			!frappe.model.has_workflow(doctype)
 		) {
 			actions_menu_items.push(bulk_cancel());
-		}
+		} */
 
 		// bulk delete
-		if (frappe.model.can_delete(doctype)) {
-			actions_menu_items.push(bulk_delete());
-		}
+		// if (frappe.model.can_delete(doctype)) {
+		// 	actions_menu_items.push(bulk_delete());
+		// }
 
 		return actions_menu_items;
 	}
