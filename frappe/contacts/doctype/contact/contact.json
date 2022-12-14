@@ -10,16 +10,18 @@
  "field_order": [
   "contact_section",
   "first_name",
+  "column_break_3",
+  "designation",
+  "column_break_5",
+  "department",
   "middle_name",
   "last_name",
   "email_id",
   "user",
   "address",
   "sync_with_google_contacts",
-  "cb00",
   "status",
   "salutation",
-  "designation",
   "gender",
   "phone",
   "mobile_no",
@@ -37,8 +39,13 @@
   "links",
   "is_primary_contact",
   "more_info",
-  "department",
-  "unsubscribed"
+  "unsubscribed",
+  "section_break_33",
+  "related_to",
+  "visiting_card_front_image",
+  "column_break_35",
+  "authority_level",
+  "visiting_card_back_image"
  ],
  "fields": [
   {
@@ -50,7 +57,7 @@
    "fieldname": "first_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "First Name",
+   "label": "Person Name",
    "oldfieldname": "first_name",
    "oldfieldtype": "Data",
    "reqd": 1
@@ -59,6 +66,7 @@
    "bold": 1,
    "fieldname": "last_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Last Name",
    "oldfieldname": "last_name",
    "oldfieldtype": "Data"
@@ -67,6 +75,7 @@
    "bold": 1,
    "fieldname": "email_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_global_search": 1,
    "in_list_view": 1,
    "label": "Email Address",
@@ -79,19 +88,16 @@
   {
    "fieldname": "user",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_global_search": 1,
    "label": "User Id",
    "options": "User"
   },
   {
-   "fieldname": "cb00",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "Passive",
    "fieldname": "status",
    "fieldtype": "Select",
-   "in_list_view": 1,
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Passive\nOpen\nReplied"
@@ -99,12 +105,14 @@
   {
    "fieldname": "salutation",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salutation",
    "options": "Salutation"
   },
   {
    "fieldname": "gender",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Gender",
    "options": "Gender"
   },
@@ -112,6 +120,7 @@
    "bold": 1,
    "fieldname": "phone",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Phone",
    "oldfieldname": "contact_no",
@@ -129,6 +138,7 @@
   {
    "fieldname": "contact_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Reference",
    "options": "fa fa-pushpin"
   },
@@ -149,18 +159,21 @@
   {
    "fieldname": "more_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "More Information",
    "options": "fa fa-file-text"
   },
   {
    "fieldname": "department",
-   "fieldtype": "Data",
-   "label": "Department"
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Axis Department"
   },
   {
    "fieldname": "designation",
-   "fieldtype": "Data",
-   "label": "Designation"
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
   },
   {
    "default": "0",
@@ -171,6 +184,7 @@
   {
    "fieldname": "middle_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Middle Name"
   },
   {
@@ -189,6 +203,7 @@
   {
    "fieldname": "address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Address",
    "options": "Address"
   },
@@ -201,6 +216,7 @@
   {
    "fieldname": "mobile_no",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Mobile No",
    "options": "Phone",
    "read_only": 1
@@ -216,6 +232,7 @@
    "default": "0",
    "fieldname": "sync_with_google_contacts",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Sync with Google Contacts"
   },
   {
@@ -242,7 +259,46 @@
   {
    "fieldname": "company_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Company Name"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "related_to",
+   "fieldtype": "Select",
+   "label": "Related to",
+   "options": "\nAutomation\nAnalytical\nBoth"
+  },
+  {
+   "fieldname": "visiting_card_front_image",
+   "fieldtype": "Attach Image",
+   "label": "Visiting Card Front Image"
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "authority_level",
+   "fieldtype": "Select",
+   "label": "Authority Level",
+   "options": "\nA\nB\nC\nD"
+  },
+  {
+   "fieldname": "visiting_card_back_image",
+   "fieldtype": "Attach Image",
+   "label": "Visiting Card Back Image"
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-user",
@@ -250,7 +306,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-08-27 14:12:09.906719",
+ "modified": "2022-12-13 19:46:50.024113",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Contact",
@@ -381,5 +437,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }
