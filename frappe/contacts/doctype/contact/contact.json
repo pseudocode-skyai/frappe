@@ -2,17 +2,17 @@
  "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
- "allow_rename": 1,
+ "autoname": "field:first_name",
  "creation": "2013-01-10 16:34:32",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
   "contact_section",
+  "company_name",
   "first_name",
   "column_break_3",
   "designation",
-  "column_break_5",
   "department",
   "middle_name",
   "last_name",
@@ -25,7 +25,6 @@
   "gender",
   "phone",
   "mobile_no",
-  "company_name",
   "image",
   "sb_00",
   "google_contacts",
@@ -60,7 +59,8 @@
    "label": "Person Name",
    "oldfieldname": "first_name",
    "oldfieldtype": "Data",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "bold": 1,
@@ -165,9 +165,8 @@
   },
   {
    "fieldname": "department",
-   "fieldtype": "Link",
-   "label": "Department",
-   "options": "Axis Department"
+   "fieldtype": "Data",
+   "label": "Department"
   },
   {
    "fieldname": "designation",
@@ -259,15 +258,10 @@
   {
    "fieldname": "company_name",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Company Name"
   },
   {
    "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_5",
    "fieldtype": "Column Break"
   },
   {
@@ -301,12 +295,13 @@
    "fieldtype": "Section Break"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-user",
  "idx": 1,
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-13 19:46:50.024113",
+ "modified": "2022-12-15 09:37:44.292288",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Contact",
