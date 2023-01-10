@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_import": 1,
- "allow_rename": 1,
  "creation": "2013-01-10 16:34:32",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -44,7 +43,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Address Type",
-   "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nPermanent\nOther",
+   "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nCompany\nPermanent\nOther",
    "reqd": 1
   },
   {
@@ -145,10 +144,11 @@
    "options": "Dynamic Link"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2020-10-21 16:14:37.284830",
+ "modified": "2022-12-16 11:27:00.281721",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Address",
