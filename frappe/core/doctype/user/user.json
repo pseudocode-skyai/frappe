@@ -12,16 +12,17 @@
   "first_name",
   "middle_name",
   "last_name",
+  "user_id",
   "column_break0",
   "full_name",
   "username",
   "designation",
   "level",
+  "state",
   "column_break_11",
   "language",
   "time_zone",
   "user_level_category",
-  "state",
   "region",
   "send_welcome_email",
   "unsubscribed",
@@ -644,6 +645,11 @@
    "fieldtype": "Select",
    "label": "Region",
    "options": "\nHO\nMEA\nSouth\nNorth\nWest"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Data",
+   "label": "User Id"
   }
  ],
  "hide_toolbar": 1,
@@ -707,7 +713,7 @@
    "link_fieldname": "user"
   }
  ],
- "modified": "2023-01-11 11:30:27.347579",
+ "modified": "2023-01-16 09:44:01.568378",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "User",
