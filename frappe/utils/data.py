@@ -1003,6 +1003,9 @@ def parse_val(v):
 		v = int(v)
 	return v
 
+def round_half_up(n, decimals=0):
+		multiplier = 10 ** decimals
+		return math.floor(n*multiplier + 0.5) / multiplier
 
 def fmt_money(amount, precision=None, currency=None, format=None):
 	"""
@@ -1039,7 +1042,7 @@ def fmt_money(amount, precision=None, currency=None, format=None):
 			elif len(decimals) < precision:
 				precision = len(decimals)
 
-	amount = "%.*f" % (precision, round(flt(amount), precision))
+	amount = "%.*f" % (precision, round_half_up(flt(amount), precision))
 
 	if amount.find(".") == -1:
 		decimals = ""
