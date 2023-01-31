@@ -20,6 +20,8 @@ frappe.views.Workspace = class Workspace {
 		this.prepare_container();
 		this.show_or_hide_sidebar();
 		this.setup_dropdown();
+		this.attendance();
+
 		this.pages = {};
 		this.sidebar_items = {};
 		this.sidebar_categories = [
@@ -186,6 +188,9 @@ frappe.views.Workspace = class Workspace {
 		this.page.set_secondary_action(__('Customize'), () => {
 			this.customize();
 		});
+		// this.page.set_primary_action(__('Check Out'), () => {
+		// 	this.customize();
+		// });
 
 		this.page.add_menu_item(__('Reset Customizations'), () => {
 			this.current_page.reset_customization();
@@ -195,6 +200,248 @@ frappe.views.Workspace = class Workspace {
 			this.toggle_side_bar();
 		}, 1);
 	}
+
+	attendance() {
+		const user_id = frappe.session.user;
+		const login_user = frappe.user.full_name();
+		const time_now = new Date().toLocaleTimeString();
+		const date_now = frappe.datetime.get_today();
+		const name = frappe.user.full_name() + "-" + date_now + "-" + "IN"
+		var longitude = 0;
+		var latitude = 0;
+		var city= "";
+		var state= "";
+		var area= "";
+	
+
+		frappe.db.exists("User Attendance", name).then(exists => {
+			if (exists) {
+				this.page.add_button(__("Check Out"), () => {
+					function onPositionRecieved(position){
+						longitude= position.coords.longitude;
+						latitude= position.coords.latitude;
+					
+						fetch('https://api.opencagedata.com/geocode/v1/json?q='+latitude+'+'+longitude+'&key=51798813415d49bfa8129c1e8b850013')
+						.then(response => response.json())
+						.then(data => {
+							city=data['results'][0].components.city;
+							state=data['results'][0].components.state;
+							area=data['results'][0].components.residential;
+							console.log("city",city);
+							frappe.call({
+								method: "axis_india_app.controller.workspace.set_attendance",
+			
+								args: {
+									user_id: user_id,
+									login_user: login_user,
+									log_type: "OUT",
+									time_now: time_now,
+									date_now: date_now,
+									longitude:longitude,
+									latitude:latitude,
+									city:city,
+									state:state,
+									area:area,
+								},
+								callback: function(r) {
+			
+								}
+							});
+						})		
+					}
+					function locationNotRecieved(positionError){
+						console.log(positionError);
+					}
+					if(navigator.geolocation){
+						navigator.geolocation.getCurrentPosition(onPositionRecieved,locationNotRecieved,{ enableHighAccuracy: true});
+					}	
+				});
+				} else {
+					this.page.add_button(__("Check In"), () => {
+						function onPositionRecieved(position){
+							longitude= position.coords.longitude;
+							latitude= position.coords.latitude;
+		
+							fetch('https://api.opencagedata.com/geocode/v1/json?q='+latitude+'+'+longitude+'&key=51798813415d49bfa8129c1e8b850013')
+							.then(response => response.json())
+							.then(data => {
+								city=data['results'][0].components.city;
+								state=data['results'][0].components.state;
+								area=data['results'][0].components.residential;
+								frappe.call({
+									method: "axis_india_app.controller.workspace.set_attendance",
+									args: {
+										user_id: user_id,
+										login_user: login_user,
+										log_type: "IN",
+										time_now: time_now,
+										date_now: date_now,
+										longitude:longitude,
+										latitude:latitude,
+										city:city,
+										state:state,
+										area:area,
+									},
+									callback: function(r) {
+										console.log({ r });
+										window.location.reload();
+									}
+									
+								});
+							
+							})		
+						}
+		
+						function locationNotRecieved(positionError){
+							console.log(positionError);
+						}
+						if(navigator.geolocation){
+							navigator.geolocation.getCurrentPosition(onPositionRecieved,locationNotRecieved,{ enableHighAccuracy: true});
+						}	
+					
+						// frappe.call({
+						// 	method: "patel_print_app.controller.workspace.set_attendance",
+						// 	args: {
+						// 		user_id: user_id,
+						// 		login_user: login_user,
+						// 		log_type: "IN",
+						// 		time_now: time_now,
+						// 		date_now: date_now
+						// 	},
+						// 	callback: function(r) {
+						// 		console.log({ r });
+						// 		setTimeout(function(){
+						// 			window.location.reload(1);
+						// 		}, 500);
+						// 	}
+						// });
+					});
+				
+			}
+		});
+
+		
+		
+	}
+	/* attendance() {
+		const user_id = frappe.session.user;
+		const login_user = frappe.user.full_name();
+		const time_now = new Date().toLocaleTimeString();
+		const date_now = frappe.datetime.get_today();
+		const name = frappe.user.full_name() + "-" + date_now + "-" + "IN";
+		var longitude = 0;
+		var latitude = 0;
+		var city= "";
+		var state= "";
+		var area= "";
+		
+ 
+		var test1 = 0;
+
+		frappe.call({
+				method: "frappe.client.get",
+				async: false,
+				args: {
+					doctype: "User Attendance",
+					name: name
+				},
+			callback(r) {
+				if (r.message) {
+					var task = r.message;
+					test1 = 1;
+				}
+			}
+		});
+		
+		if (test1 === 1) {	
+			this.page.add_button(__("Check Out"), () => {
+				function onPositionRecieved(position){
+					longitude= position.coords.longitude;
+					latitude= position.coords.latitude;
+				
+					fetch('https://api.opencagedata.com/geocode/v1/json?q='+latitude+'+'+longitude+'&key=51798813415d49bfa8129c1e8b850013')
+					.then(response => response.json())
+					.then(data => {
+						city=data['results'][0].components.city;
+						state=data['results'][0].components.state;
+						area=data['results'][0].components.residential;
+						console.log("city",city);
+						frappe.call({
+							method: "axis_india_app.controller.workspace.set_attendance",
+		
+							args: {
+								user_id: user_id,
+								login_user: login_user,
+								log_type: "OUT",
+								time_now: time_now,
+								date_now: date_now,
+								longitude:longitude,
+								latitude:latitude,
+								city:city,
+								state:state,
+								area:area,
+							},
+							callback: function(r) {
+		
+							}
+						});
+					})		
+				}
+				function locationNotRecieved(positionError){
+					console.log(positionError);
+				}
+				if(navigator.geolocation){
+					navigator.geolocation.getCurrentPosition(onPositionRecieved,locationNotRecieved,{ enableHighAccuracy: true});
+				}	
+				
+			});
+		} else {
+			this.page.add_button(__("Check In"), () => {
+				function onPositionRecieved(position){
+					longitude= position.coords.longitude;
+					latitude= position.coords.latitude;
+
+					fetch('https://api.opencagedata.com/geocode/v1/json?q='+latitude+'+'+longitude+'&key=51798813415d49bfa8129c1e8b850013')
+					.then(response => response.json())
+					.then(data => {
+						city=data['results'][0].components.city;
+						state=data['results'][0].components.state;
+						area=data['results'][0].components.residential;
+						frappe.call({
+							method: "axis_india_app.controller.workspace.set_attendance",
+							args: {
+								user_id: user_id,
+								login_user: login_user,
+								log_type: "IN",
+								time_now: time_now,
+								date_now: date_now,
+								longitude:longitude,
+								latitude:latitude,
+								city:city,
+								state:state,
+								area:area,
+							},
+							callback: function(r) {
+								console.log({ r });
+								window.location.reload();
+							}
+							
+						});
+					
+					})		
+				}
+
+				function locationNotRecieved(positionError){
+					console.log(positionError);
+				}
+				if(navigator.geolocation){
+					navigator.geolocation.getCurrentPosition(onPositionRecieved,locationNotRecieved,{ enableHighAccuracy: true});
+				}	
+			
+			});
+			
+		}
+	} */
 
 	toggle_side_bar() {
 		let show_workspace_sidebar = JSON.parse(localStorage.show_workspace_sidebar || "true");
