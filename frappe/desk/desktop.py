@@ -402,7 +402,6 @@ def get_desk_sidebar_items():
 	order_by = "creation asc"
 	# ***** END SIDEBAR ORDER CHANGE ***** #
 
-
 	all_pages = frappe.get_all(
 		"Workspace",
 		fields=["name", "category", "icon", "module"],
