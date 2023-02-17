@@ -644,8 +644,9 @@
   {
    "fieldname": "region",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Region",
-   "options": "\nHO\nMEA\nSouth\nNorth\nWest"
+   "options": "\nHO\nMEA\nSouth\nNorth\nWest\nEast\nCenter"
   },
   {
    "fieldname": "user_id",
