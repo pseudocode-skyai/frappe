@@ -24,6 +24,7 @@
   "time_zone",
   "user_level_category",
   "region",
+  "reports_to",
   "send_welcome_email",
   "unsubscribed",
   "user_image",
@@ -650,6 +651,12 @@
    "fieldname": "user_id",
    "fieldtype": "Data",
    "label": "User Id"
+  },
+  {
+    "fieldname": "reports_to",
+    "fieldtype": "Link",
+    "label": "Reports To",
+    "options": "User"
   }
  ],
  "hide_toolbar": 1,
