@@ -20,6 +20,8 @@ frappe.views.Workspace = class Workspace {
 		this.prepare_container();
 		this.show_or_hide_sidebar();
 		this.setup_dropdown();
+		this.attendance();
+
 		this.pages = {};
 		this.sidebar_items = {};
 		this.sidebar_categories = [
@@ -186,7 +188,6 @@ frappe.views.Workspace = class Workspace {
 		this.page.set_secondary_action(__('Customize'), () => {
 			this.customize();
 		});
-
 		this.page.add_menu_item(__('Reset Customizations'), () => {
 			this.current_page.reset_customization();
 		}, 1);
@@ -195,7 +196,125 @@ frappe.views.Workspace = class Workspace {
 			this.toggle_side_bar();
 		}, 1);
 	}
-
+// Home Page Add check in and check out button automatically create user attendance entry 
+	attendance() {
+		const user_id = frappe.session.user;
+		const login_user = frappe.user.full_name();
+		const time_now = new Date().toLocaleTimeString();
+		const date_now = frappe.datetime.get_today();
+		var longitude = 0;
+		var latitude = 0;
+		var city= "";
+		var state= "";
+		var area= "";
+		const name_in = frappe.user.full_name() + "-" + date_now + "-" + "IN"
+	    const name_out = frappe.user.full_name() + "-" + date_now + "-" + "OUT"
+        frappe.db.exists("User Attendance", name_out).then(exists_out => {
+			if (!exists_out) {
+				frappe.db.exists("User Attendance", name_in).then(exists => {
+					if (exists) {
+							this.page.add_button(__("Check Out"), () => {
+								frappe.confirm(
+									'Are you sure you want to Check Out ?',
+									function(){
+										function onPositionRecieved(position){
+											longitude= position.coords.longitude;
+											latitude= position.coords.latitude;
+											fetch('https://api.opencagedata.com/geocode/v1/json?q='+latitude+'+'+longitude+'&key=51798813415d49bfa8129c1e8b850013')
+											.then(response => response.json())
+											.then(data => {
+												city=data['results'][0].components.city;
+												state=data['results'][0].components.state;
+												area=data['results'][0].components.residential;
+												console.log("city",city);
+												frappe.call({
+													method: "axis_india_app.controller.workspace.set_attendance",
+								
+													args: {
+														user_id: user_id,
+														login_user: login_user,
+														log_type: "OUT",
+														time_now: time_now,
+														date_now: date_now,
+														longitude:longitude,
+														latitude:latitude,
+														city:city,
+														state:state,
+														area:area,
+													},
+													callback: function(r) {
+														setTimeout(function(){
+															window.location.reload(1);
+														}, 500);
+								
+													}
+												});
+											})		
+										}
+										function locationNotRecieved(positionError){
+											console.log(positionError);
+										}
+										if(navigator.geolocation){
+											navigator.geolocation.getCurrentPosition(onPositionRecieved,locationNotRecieved,{ enableHighAccuracy: true});
+										}	
+										window.close();
+									},
+									function(){
+										
+										show_alert('Thanks for continue here!')
+									}
+								)
+							});
+						} else {
+							this.page.add_button(__("Check In"), () => {
+								function onPositionRecieved(position){
+									longitude= position.coords.longitude;
+									latitude= position.coords.latitude;
+				
+									fetch('https://api.opencagedata.com/geocode/v1/json?q='+latitude+'+'+longitude+'&key=51798813415d49bfa8129c1e8b850013')
+									.then(response => response.json())
+									.then(data => {
+										city=data['results'][0].components.city;
+										state=data['results'][0].components.state;
+										area=data['results'][0].components.residential;
+										frappe.call({
+											method: "axis_india_app.controller.workspace.set_attendance",
+											args: {
+												user_id: user_id,
+												login_user: login_user,
+												log_type: "IN",
+												time_now: time_now,
+												date_now: date_now,
+												longitude:longitude,
+												latitude:latitude,
+												city:city,
+												state:state,
+												area:area,
+											},
+											callback: function(r) {
+												console.log({ r });
+												setTimeout(function(){
+													window.location.reload(1);
+												}, 500);
+											}
+											
+										});
+									
+									})		
+								}
+								function locationNotRecieved(positionError){
+									console.log(positionError);
+								}
+								if(navigator.geolocation){
+									navigator.geolocation.getCurrentPosition(onPositionRecieved,locationNotRecieved,{ enableHighAccuracy: true});
+								}
+							});
+						
+					}
+				});
+			}
+		})	
+	}
 	toggle_side_bar() {
 		let show_workspace_sidebar = JSON.parse(localStorage.show_workspace_sidebar || "true");
 		show_workspace_sidebar = !show_workspace_sidebar;
@@ -409,5 +528,3 @@ class DesktopPage {
 		this.sections["cards"] = cards;
 	}
 }
-
-

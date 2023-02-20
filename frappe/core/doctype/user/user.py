@@ -1192,3 +1192,39 @@ def get_enabled_users():
 		return enabled_users
 
 	return frappe.cache().get_value("enabled_users", _get_enabled_users)
+
+
+def share_doc_with_approver(doc, user):
+	# if approver does not have permissions, share
+	parent_user = []
+	test_user = frappe.get_doc("User", user)
+
+	frappe.share.add(doc.doctype, doc.name, test_user.name, write=1, flags={"ignore_share_permission": True})
+	while (test_user.reports_to):
+		user1 = frappe.get_doc("User", test_user.reports_to)
+		test_user = user1
+		frappe.share.add(doc.doctype, doc.name, test_user.name, write=1, flags={"ignore_share_permission": True})
+
+
+	# if not test_user.reports_to:
+		
+	
+	# if not frappe.has_permission(doc=doc, ptype="read", user=user):
+		
+	# 	frappe.share.add(doc.doctype, doc.name, user, read=1, write=1, flags={"ignore_share_permission": True})
+
+	# 	frappe.msgprint(
+	# 		_("Shared with the user {0} with {1} access").format(user, frappe.bold("submit"), alert=True)
+	# 	)
+	# remove shared doc if approver changes
+	doc_before_save = doc.get_doc_before_save()
+	if doc_before_save:
+		approvers = {
+			"Lead": "lead_transfer",
+			"Visit": "reports_to",
+			"Address": "created_by"
+		}
+
+		approver = approvers.get(doc.doctype)
+		if doc_before_save.get(approver) != doc.get(approver):
+			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
