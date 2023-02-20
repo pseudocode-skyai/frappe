@@ -24,6 +24,7 @@
   "time_zone",
   "user_level_category",
   "region",
+  "reports_to",
   "send_welcome_email",
   "unsubscribed",
   "user_image",
@@ -643,13 +644,20 @@
   {
    "fieldname": "region",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Region",
-   "options": "\nHO\nMEA\nSouth\nNorth\nWest"
+   "options": "\nHO\nMEA\nSouth\nNorth\nWest\nEast\nCenter"
   },
   {
    "fieldname": "user_id",
    "fieldtype": "Data",
    "label": "User Id"
+  },
+  {
+    "fieldname": "reports_to",
+    "fieldtype": "Link",
+    "label": "Reports To",
+    "options": "User"
   }
  ],
  "hide_toolbar": 1,

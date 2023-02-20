@@ -528,5 +528,3 @@ class DesktopPage {
 		this.sections["cards"] = cards;
 	}
 }
-
-
