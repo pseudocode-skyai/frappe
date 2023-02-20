@@ -1515,7 +1515,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 			});
 		}
 
-		items.push({
+	/* 	items.push({
 			label: __("Toggle Sidebar", null, "Button in list view menu"),
 			action: () => this.toggle_side_bar(),
 			condition: () => !this.hide_sidebar,
@@ -1528,7 +1528,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 			action: () => this.share_url(),
 			standard: true,
 			shortcut: "Ctrl+L",
-		});
+		}); */
 
 		if (
 			frappe.user.has_role("System Manager") &&
@@ -1769,7 +1769,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 			};
 		};
 
-		// bulk edit
+/* 		// bulk edit
 		if (has_editable_fields(doctype)) {
 			actions_menu_items.push(bulk_edit());
 		}
@@ -1806,7 +1806,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		// bulk delete
 		if (frappe.model.can_delete(doctype)) {
 			actions_menu_items.push(bulk_delete());
-		}
+		} */
 
 		return actions_menu_items;
 	}

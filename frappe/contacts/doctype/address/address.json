@@ -43,14 +43,13 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Address Type",
-   "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nCompany\nPermanent\nOther",
+   "options": "Company\nBilling\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nPermanent\nOther",
    "reqd": 1
   },
   {
    "fieldname": "address_line1",
    "fieldtype": "Data",
-   "label": "Address Line 1",
-   "reqd": 1
+   "label": "Address Line 1"
   },
   {
    "fieldname": "address_line2",
@@ -63,7 +62,6 @@
    "in_global_search": 1,
    "in_list_view": 1,
    "label": "City/Town",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -148,7 +146,7 @@
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2022-12-16 11:27:00.281721",
+ "modified": "2023-02-10 12:22:42.168994",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Address",

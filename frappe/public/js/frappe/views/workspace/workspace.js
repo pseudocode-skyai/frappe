@@ -20,7 +20,6 @@ frappe.views.Workspace = class Workspace {
 		this.prepare_container();
 		this.show_or_hide_sidebar();
 		this.setup_dropdown();
-		this.attendance();
 
 		this.pages = {};
 		this.sidebar_items = {};
@@ -139,7 +138,8 @@ frappe.views.Workspace = class Workspace {
 
 		this.pages[page] ? this.pages[page].show() : this.make_page(page);
 		this.current_page = this.pages[page];
-		this.setup_dropdown();
+		// this.setup_dropdown();
+		this.attendance();
 	}
 
 	make_page(page) {
@@ -183,18 +183,20 @@ frappe.views.Workspace = class Workspace {
 	}
 
 	setup_dropdown() {
+
+		this.attendance();
 		this.page.clear_menu();
 
 		this.page.set_secondary_action(__('Customize'), () => {
 			this.customize();
 		});
-		this.page.add_menu_item(__('Reset Customizations'), () => {
+		/* this.page.add_menu_item(__('Reset Customizations'), () => {
 			this.current_page.reset_customization();
 		}, 1);
 
 		this.page.add_menu_item(__('Toggle Sidebar'), () => {
 			this.toggle_side_bar();
-		}, 1);
+		}, 1); */
 	}
 // Home Page Add check in and check out button automatically create user attendance entry 
 	attendance() {
@@ -213,7 +215,7 @@ frappe.views.Workspace = class Workspace {
 			if (!exists_out) {
 				frappe.db.exists("User Attendance", name_in).then(exists => {
 					if (exists) {
-							this.page.add_button(__("Check Out"), () => {
+							this.page.set_secondary_action(__("Check Out"), () => {
 								frappe.confirm(
 									'Are you sure you want to Check Out ?',
 									function(){
@@ -258,15 +260,15 @@ frappe.views.Workspace = class Workspace {
 											navigator.geolocation.getCurrentPosition(onPositionRecieved,locationNotRecieved,{ enableHighAccuracy: true});
 										}	
 										window.close();
+										show_alert('Checked out successfully!')
 									},
 									function(){
-										
-										show_alert('Thanks for continue here!')
+										show_alert('Thank You for continue here!')
 									}
 								)
 							});
 						} else {
-							this.page.add_button(__("Check In"), () => {
+							this.page.set_secondary_action(__("Check In"), () => {
 								function onPositionRecieved(position){
 									longitude= position.coords.longitude;
 									latitude= position.coords.latitude;
@@ -292,7 +294,7 @@ frappe.views.Workspace = class Workspace {
 												area:area,
 											},
 											callback: function(r) {
-												console.log({ r });
+												show_alert('Checked in successfully!')
 												setTimeout(function(){
 													window.location.reload(1);
 												}, 500);
