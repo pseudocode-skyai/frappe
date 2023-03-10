@@ -400,7 +400,6 @@ def get_desk_sidebar_items():
 	# order_by = "pin_to_top desc, pin_to_bottom asc, name asc"
 	order_by = "creation asc"
 	# ***** END SIDEBAR ORDER CHANGE ***** #
-	order_by = "pin_to_top desc, pin_to_bottom asc, name asc"
 	all_pages = frappe.get_all(
 		"Workspace",
 		fields=["name", "category", "icon", "module"],
