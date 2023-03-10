@@ -300,7 +300,7 @@ export default class NumberCardWidget extends Widget {
 					this.render_card();
 				}
 			},
-			{
+	/* 		{
 				label: __('Edit'),
 				action: 'action-edit',
 				handler: () => {
@@ -310,7 +310,7 @@ export default class NumberCardWidget extends Widget {
 						this.name
 					);
 				}
-			},
+			}, */
 		];
 
 		this.set_card_actions(actions);

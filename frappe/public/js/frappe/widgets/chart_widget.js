@@ -112,7 +112,7 @@ export default class ChartWidget extends Widget {
 			}
 			frappe.run_serially([
 				() => this.prepare_chart_object(),
-				() => this.setup_filter_button(),
+				// () => this.setup_filter_button(),
 				() => this.fetch_and_update_chart(),
 			]);
 		});
@@ -303,7 +303,7 @@ export default class ChartWidget extends Widget {
 					this.make_chart();
 				}
 			},
-			{
+		/* 	{
 				label: __("Edit"),
 				action: "action-edit",
 				handler: () => {
@@ -313,8 +313,8 @@ export default class ChartWidget extends Widget {
 						this.chart_doc.name
 					);
 				}
-			},
-			{
+			}, */
+	/* 		{
 				label: __("Reset Chart"),
 				action: "action-reset",
 				handler: () => {
@@ -322,17 +322,17 @@ export default class ChartWidget extends Widget {
 					delete this.dashboard_chart;
 					this.make_chart();
 				}
-			}
+			} */
 		];
 
 		if (this.chart_doc.document_type) {
-			actions.push({
+/* 			actions.push({
 				label: __("{0} List", [this.chart_doc.document_type]),
 				action: "action-list",
 				handler: () => {
 					frappe.set_route("List", this.chart_doc.document_type);
 				}
-			});
+			}); */
 		} else if (this.chart_doc.chart_type === "Report") {
 			actions.push({
 				label: __("{0} Report", [this.chart_doc.report_name]),
@@ -451,7 +451,7 @@ export default class ChartWidget extends Widget {
 		});
 	}
 
-	create_filter_group_and_add_filters() {
+	/* create_filter_group_and_add_filters() {
 		this.filter_group = new frappe.ui.FilterGroup({
 			doctype: this.chart_doc.document_type,
 			parent_doctype: this.chart_doc.parent_document_type,
@@ -469,7 +469,7 @@ export default class ChartWidget extends Widget {
 			frappe.model.with_doctype(this.chart_doc.document_type, () => {
 				this.filter_group.add_filters_to_filter_group(this.filters);
 			});
-	}
+	} */
 
 	set_chart_actions(actions) {
 		/* eslint-disable indent */
