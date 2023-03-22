@@ -800,7 +800,7 @@ class FilterArea {
 	}
 
 	make_filter_list() {
-/* 	$(`<div class="filter-selector">
+	$(`<div class="filter-selector">
 			<button class="btn btn-default btn-sm filter-button">
 				<span class="filter-icon">
 					${frappe.utils.icon('filter')}
@@ -810,7 +810,7 @@ class FilterArea {
 				<span>
 			</button>
 		</div>`
-		).appendTo(this.$filter_list_wrapper); */
+		).appendTo(this.$filter_list_wrapper);
 
 		this.filter_button = this.$filter_list_wrapper.find('.filter-button');
 		this.filter_list = new frappe.ui.FilterGroup({
