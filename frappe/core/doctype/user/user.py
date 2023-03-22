@@ -137,6 +137,16 @@ class User(Document):
 
 		if self.has_value_changed("enabled"):
 			frappe.cache().delete_key("enabled_users")
+		#create new enrty in User Permission doctype
+		
+		if frappe.db.exists({"doctype": "User Permission", "user": self.email}):
+			pass
+		else:
+			create_user_permission= frappe.new_doc("User Permission")
+			create_user_permission.user = self.email
+			create_user_permission.allow = "Region"
+			create_user_permission.for_value = self.region
+			create_user_permission.insert(ignore_mandatory=True, ignore_permissions = True,)
 
 	def has_website_permission(self, ptype, user, verbose=False):
 		"""Returns true if current user is the session user"""
