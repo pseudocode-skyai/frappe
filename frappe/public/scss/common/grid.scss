@@ -79,7 +79,8 @@
 
 .grid-static-col,
 .row-index {
-	height: 39px;
+	// height: 39px;
+	height: auto;
 	padding: var(--padding-sm) var(--padding-md);
 	max-height: 200px;
 	// border-right: 1px solid var(--border-color);

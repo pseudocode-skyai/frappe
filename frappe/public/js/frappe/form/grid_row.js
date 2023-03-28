@@ -12,7 +12,7 @@ export default class GridRow {
 		}
 		this.columns = {};
 		this.columns_list = [];
-		this.row_check_html = '<input type="checkbox" class="grid-row-check pull-left">';
+		this.row_check_html = '<input type="checkbox" class="grid-row-check pull-left left-minus">';		
 		this.make();
 	}
 	make() {
@@ -654,7 +654,7 @@ export default class GridRow {
 			});
 
 		$col.field_area = $('<div class="field-area"></div>').appendTo($col).toggle(false);
-		$col.static_area = $('<div class="static-area ellipsis"></div>').appendTo($col).html(txt);
+		$col.static_area = $('<div class="static-area ellipsis no-ellipse"></div>').appendTo($col).html(txt);
 
 		// set title attribute to see full label for columns in the heading row
 		if (!this.doc) {
