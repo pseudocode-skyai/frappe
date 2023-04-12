@@ -122,11 +122,9 @@
   {
    "fieldname": "attached_to_doctype",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
    "label": "Attached To DocType",
    "options": "DocType",
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_10",
@@ -175,7 +173,7 @@
  "icon": "fa fa-file",
  "idx": 1,
  "links": [],
- "modified": "2020-06-28 12:21:30.772386",
+ "modified": "2023-04-12 12:14:57.161117",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "File",

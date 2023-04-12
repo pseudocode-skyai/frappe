@@ -1477,7 +1477,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 			});
 		}
 
-		if (frappe.model.can_set_user_permissions(doctype)) {
+		/* if (frappe.model.can_set_user_permissions(doctype)) {
 			items.push({
 				label: __("User Permissions", null, "Button in list view menu"),
 				action: () =>
@@ -1486,18 +1486,18 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 					}),
 				standard: true,
 			});
-		}
+		} */
 
 		if (frappe.user_roles.includes("System Manager")) {
-			items.push({
+			/* items.push({
 				label: __("Role Permissions Manager", null, "Button in list view menu"),
 				action: () =>
 					frappe.set_route("permission-manager", {
 						doctype,
 					}),
 				standard: true,
-			});
-
+			}); */
+/* 
 			items.push({
 				label: __("Customize", null, "Button in list view menu"),
 				action: () => {
@@ -1512,7 +1512,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 				},
 				standard: true,
 				shortcut: "Ctrl+J",
-			});
+			}); */
 		}
 
 	/* 	items.push({
@@ -1535,11 +1535,11 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 			frappe.boot.developer_mode === 1
 		) {
 			// edit doctype
-			items.push({
+			/* items.push({
 				label: __("Edit DocType", null, "Button in list view menu"),
 				action: () => frappe.set_route("form", "doctype", doctype),
 				standard: true,
-			});
+			}); */
 		}
 
 		if (frappe.user.has_role("System Manager")) {
@@ -1807,6 +1807,9 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		if (frappe.model.can_delete(doctype)) {
 			actions_menu_items.push(bulk_delete());
 		} */
+		if (frappe.model.can_delete(doctype)) {
+			actions_menu_items.push(bulk_delete());
+		}
 
 		return actions_menu_items;
 	}
