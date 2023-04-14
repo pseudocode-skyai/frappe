@@ -50,4 +50,6 @@ frappe.ui.form.on("File", "refresh", function(frm) {
 	frm.page.wrapper.find(".comment-box").css({"display":"none"});
 	frm.page.wrapper.find(".timeline-content").css({"display":"none"});
 	frm.page.wrapper.find(".timeline-badge").css({"display":"none"});
+	frm.page.wrapper.find(".new-timeline").css({"display":"none"});
+	
 });
