@@ -1323,33 +1323,33 @@ class Document(BaseDocument):
 		"""Returns Desk URL for this document."""
 		return get_absolute_url(self.doctype, self.name)
 
-	# def add_comment(
-	# 	self,
-	# 	comment_type="Comment",
-	# 	text=None,
-	# 	comment_email=None,
-	# 	link_doctype=None,
-	# 	link_name=None,
-	# 	comment_by=None,
-	# ):
-	# 	"""Add a comment to this document.
+	def add_comment(
+		self,
+		comment_type="Comment",
+		text=None,
+		comment_email=None,
+		link_doctype=None,
+		link_name=None,
+		comment_by=None,
+	):
+		"""Add a comment to this document.
 
-	# 	:param comment_type: e.g. `Comment`. See Communication for more info."""
+		:param comment_type: e.g. `Comment`. See Communication for more info."""
 
-	# 	out = frappe.get_doc(
-	# 		{
-	# 			"doctype": "Comment",
-	# 			"comment_type": comment_type,
-	# 			"comment_email": comment_email or frappe.session.user,
-	# 			"comment_by": comment_by,
-	# 			"reference_doctype": self.doctype,
-	# 			"reference_name": self.name,
-	# 			"content": text or comment_type,
-	# 			"link_doctype": link_doctype,
-	# 			"link_name": link_name,
-	# 		}
-	# 	).insert(ignore_permissions=True)
-	# 	return out
+		out = frappe.get_doc(
+			{
+				"doctype": "Comment",
+				"comment_type": comment_type,
+				"comment_email": comment_email or frappe.session.user,
+				"comment_by": comment_by,
+				"reference_doctype": self.doctype,
+				"reference_name": self.name,
+				"content": text or comment_type,
+				"link_doctype": link_doctype,
+				"link_name": link_name,
+			}
+		).insert(ignore_permissions=True)
+		return out
 
 	def add_seen(self, user=None):
 		"""add the given/current user to list of users who have seen this document (_seen)"""
