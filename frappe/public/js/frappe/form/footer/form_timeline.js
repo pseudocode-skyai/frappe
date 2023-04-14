@@ -19,7 +19,7 @@ class FormTimeline extends BaseTimeline {
 	}
 
 	setup_timeline_actions() {
-		this.add_action_button(__('New Email'), () => this.compose_mail(), 'mail', 'btn-secondary-dark');
+		// this.add_action_button(__('New Email'), () => this.compose_mail(), 'mail', 'btn-secondary-dark');
 		this.setup_new_event_button();
 	}
 

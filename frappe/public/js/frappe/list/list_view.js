@@ -1806,11 +1806,7 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 		// bulk delete
 		if (frappe.model.can_delete(doctype)) {
 			actions_menu_items.push(bulk_delete());
-		} */
-		if (frappe.model.can_delete(doctype)) {
-			actions_menu_items.push(bulk_delete());
-		}
-
+		} *
 		return actions_menu_items;
 	}
 

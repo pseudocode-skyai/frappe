@@ -36,4 +36,18 @@ frappe.ui.form.on("File", "refresh", function(frm) {
 			});
 		});
 	}
+	if (!frm.doc.__islocal) {
+		if(frm.doc.name && frm.doc.docstatus !=1 ){
+			if(frm.has_perm('delete')) {
+				frm.add_custom_button(__("Delete"), function(){
+					frappe.model.delete_doc(frm.doc.doctype, frm.doc.name, function() {
+						window.history.back();
+					}, __('Actions'));
+				})     
+			}
+		}
+	}
+	frm.page.wrapper.find(".comment-box").css({"display":"none"});
+	frm.page.wrapper.find(".timeline-content").css({"display":"none"});
+	frm.page.wrapper.find(".timeline-badge").css({"display":"none"});
 });

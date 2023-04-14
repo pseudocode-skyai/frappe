@@ -57,7 +57,8 @@
   },
   {
    "fieldname": "section_break_5",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "default": "0",
@@ -117,7 +118,8 @@
   {
    "depends_on": "eval:!doc.is_folder",
    "fieldname": "section_break_8",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "attached_to_doctype",
@@ -173,7 +175,7 @@
  "icon": "fa fa-file",
  "idx": 1,
  "links": [],
- "modified": "2023-04-12 12:14:57.161117",
+ "modified": "2023-04-14 12:52:31.677591",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "File",
