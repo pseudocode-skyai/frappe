@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model import core_doctypes_list
 from frappe.model.docfield import supports_translation
 from frappe.model.document import Document
-from frappe.utils import cstr
+from frappe.utils import cstr, random_string
 
 
 class CustomField(Document):
@@ -23,7 +23,7 @@ class CustomField(Document):
 			label = self.label
 			if not label:
 				if self.fieldtype in ["Section Break", "Column Break"]:
-					label = self.fieldtype + "_" + str(self.idx)
+					label = self.fieldtype + "_" + str(random_string(5))
 				else:
 					frappe.throw(_("Label is mandatory"))
 
@@ -198,10 +198,13 @@ def create_custom_fields(custom_fields, ignore_validate=False, update=True):
 				field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": df["fieldname"]})
 				if not field:
 					try:
+						df = df.copy()
 						df["owner"] = "Administrator"
 						create_custom_field(doctype, df, ignore_validate=ignore_validate)
+
 					except frappe.exceptions.DuplicateEntryError:
 						pass
+
 				elif update:
 					custom_field = frappe.get_doc("Custom Field", field)
 					custom_field.flags.ignore_validate = ignore_validate

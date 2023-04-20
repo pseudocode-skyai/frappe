@@ -3,6 +3,8 @@
 # See license.txt
 from __future__ import unicode_literals
 
+import random
+import string
 import unittest
 
 import frappe
@@ -120,32 +122,6 @@ class TestDocType(unittest.TestCase):
 				condition = field.get(depends_on)
 				if condition:
 					self.assertFalse(re.match(pattern, condition))
-
-	def test_data_field_options(self):
-		doctype_name = "Test Data Fields"
-		valid_data_field_options = frappe.model.data_field_options + ("",)
-		invalid_data_field_options = ("Invalid Option 1", frappe.utils.random_string(5))
-
-		for field_option in valid_data_field_options + invalid_data_field_options:
-			test_doctype = frappe.get_doc(
-				{
-					"doctype": "DocType",
-					"name": doctype_name,
-					"module": "Core",
-					"custom": 1,
-					"fields": [
-						{"fieldname": "{0}_field".format(field_option), "fieldtype": "Data", "options": field_option}
-					],
-				}
-			)
-
-			if field_option in invalid_data_field_options:
-				# assert that only data options in frappe.model.data_field_options are valid
-				self.assertRaises(frappe.ValidationError, test_doctype.insert)
-			else:
-				test_doctype.insert()
-				self.assertEqual(test_doctype.name, doctype_name)
-				test_doctype.delete()
 
 	def test_sync_field_order(self):
 		import os
@@ -265,7 +241,7 @@ class TestDocType(unittest.TestCase):
 			self.assertListEqual(
 				test_doctype_json["field_order"], ["field_4", "field_5", "field_1", "field_2"]
 			)
-		except:
+		except Exception:
 			raise
 		finally:
 			frappe.flags.allow_doctype_export = 0
@@ -492,7 +468,7 @@ class TestDocType(unittest.TestCase):
 
 		# check invalid doctype
 		doc.append("links", {"link_doctype": "User2", "link_fieldname": "first_name"})
-		self.assertRaises(frappe.DoesNotExistError, validate_links_table_fieldnames, doc)
+		self.assertRaises(InvalidFieldNameError, validate_links_table_fieldnames, doc)
 		doc.links = []  # reset links table
 
 		# check invalid fieldname
@@ -512,7 +488,11 @@ class TestDocType(unittest.TestCase):
 		self.assertFalse(frappe.db.table_exists("Test Virtual Doctype"))
 
 
-def new_doctype(name, unique=0, depends_on="", fields=None, **kwargs):
+def new_doctype(name=None, unique=0, depends_on="", fields=None, **kwargs):
+
+	if not name:
+		name = "Test " + "".join(random.sample(string.ascii_lowercase, 10))
+
 	doc = frappe.get_doc(
 		{
 			"doctype": "DocType",

@@ -164,7 +164,7 @@ def install_app(name, verbose=False, set_as_patched=True):
 	frappe.clear_cache()
 
 	if name not in frappe.get_all_apps():
-		raise Exception("App not in apps.txt")
+		raise Exception(f"App {name} not in apps.txt")
 
 	if name in installed_apps:
 		frappe.msgprint(frappe._("App {0} already installed").format(name))
@@ -426,10 +426,21 @@ def make_site_config(
 
 def update_site_config(key, value, validate=True, site_config_path=None):
 	"""Update a value in site_config"""
+	from frappe.utils.synchronization import filelock
+
 	if not site_config_path:
 		site_config_path = get_site_config_path()
 
-	with open(site_config_path, "r") as f:
+	# Sometimes global config file is passed directly to this function
+	_is_global_conf = "common_site_config" in site_config_path
+
+	with filelock("site_config", is_global=_is_global_conf):
+		_update_config_file(key=key, value=value, config_file=site_config_path)
+
+
+def _update_config_file(key: str, value, config_file: str):
+	"""Updates site or common config"""
+	with open(config_file) as f:
 		site_config = json.loads(f.read())
 
 	# In case of non-int value
@@ -449,7 +460,7 @@ def update_site_config(key, value, validate=True, site_config_path=None):
 	else:
 		site_config[key] = value
 
-	with open(site_config_path, "w") as f:
+	with open(config_file, "w") as f:
 		f.write(json.dumps(site_config, indent=1, sort_keys=True))
 
 	if hasattr(frappe.local, "conf"):
@@ -543,7 +554,7 @@ def extract_sql_gzip(sql_gz_path):
 		decompressed_file = original_file.rstrip(".gz")
 		cmd = "gzip -dvf < {0} > {1}".format(original_file, decompressed_file)
 		subprocess.check_call(cmd, shell=True)
-	except:
+	except Exception:
 		raise
 
 	return decompressed_file
@@ -573,7 +584,7 @@ def extract_files(site_name, file_path):
 			subprocess.check_output(["tar", "xvf", tar_path, "--strip", "2"], cwd=abs_site_path)
 		elif file_path.endswith(".tgz"):
 			subprocess.check_output(["tar", "zxvf", tar_path, "--strip", "2"], cwd=abs_site_path)
-	except:
+	except Exception:
 		raise
 	finally:
 		frappe.destroy()

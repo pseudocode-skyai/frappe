@@ -330,37 +330,22 @@ def get_emails_sent_today():
 	)[0][0]
 
 
-def get_unsubscribe_message(unsubscribe_message, expose_recipients):
-	if unsubscribe_message:
-		unsubscribe_html = """<a href="<!--unsubscribe url-->"
-			target="_blank">{0}</a>""".format(
-			unsubscribe_message
-		)
-	else:
-		unsubscribe_link = """<a href="<!--unsubscribe url-->"
-			target="_blank">{0}</a>""".format(
-			_("Unsubscribe")
-		)
-		unsubscribe_html = _("{0} to stop receiving emails of this type").format(unsubscribe_link)
-
-	html = """<div class="email-unsubscribe">
-			<!--cc message-->
+def get_unsubscribe_message(unsubscribe_message: str, expose_recipients: str):
+	unsubscribe_message = unsubscribe_message or _("Unsubscribe")
+	unsubscribe_link = f'<a href="<!--unsubscribe_url-->" target="_blank">{unsubscribe_message}</a>'
+	unsubscribe_html = _("{0} to stop receiving emails of this type").format(unsubscribe_link)
+	html = f"""<div class="email-unsubscribe">
+			<!--cc_message-->
 			<div>
-				{0}
+				{unsubscribe_html}
 			</div>
-		</div>""".format(
-		unsubscribe_html
-	)
+		</div>"""
 
+	text = f"\n\n{unsubscribe_message}: <!--unsubscribe_url-->\n"
 	if expose_recipients == "footer":
-		text = "\n<!--cc message-->"
-	else:
-		text = ""
-	text += "\n\n{unsubscribe_message}: <!--unsubscribe url-->\n".format(
-		unsubscribe_message=unsubscribe_message
-	)
+		text = f"\n<!--cc_message-->{text}"
 
-	return frappe._dict({"html": html, "text": text})
+	return frappe._dict(html=html, text=text)
 
 
 def get_unsubcribed_url(
@@ -417,7 +402,7 @@ def return_unsubscribed_page(email, doctype, name):
 
 def flush(from_test=False):
 	"""flush email queue, every time: called from scheduler"""
-	# additional check
+	from frappe.utils.background_jobs import get_jobs
 
 	auto_commit = not from_test
 	if frappe.are_emails_muted():
@@ -426,12 +411,19 @@ def flush(from_test=False):
 
 	smtpserver_dict = frappe._dict()
 
+	try:
+		queued_jobs = set(get_jobs(site=frappe.local.site, key="job_name")[frappe.local.site])
+	except Exception:
+		queued_jobs = set()
+
 	for email in get_queue():
 
-		if cint(frappe.defaults.get_defaults().get("hold_queue")) == 1:
+		if cint(frappe.db.get_default("suspend_email_queue")) == 1:
 			break
 
 		if email.name:
+			job_name = f"email_queue_sendmail_{email.name}"
+
 			smtpserver = smtpserver_dict.get(email.sender)
 			if not smtpserver:
 				smtpserver = SMTPServer()
@@ -440,16 +432,18 @@ def flush(from_test=False):
 			if from_test:
 				send_one(email.name, smtpserver, auto_commit)
 			else:
+				if job_name in queued_jobs:
+					frappe.logger().debug(f"Not queueing job {job_name} because it is in queue already")
+					continue
+
 				send_one_args = {
 					"email": email.name,
 					"smtpserver": smtpserver,
 					"auto_commit": auto_commit,
 				}
-				enqueue(method="frappe.email.queue.send_one", queue="short", **send_one_args)
-
-		# NOTE: removing commit here because we pass auto_commit
-		# finally:
-		# 	frappe.db.commit()
+				enqueue(
+					method="frappe.email.queue.send_one", queue="short", job_name=job_name, **send_one_args
+				)
 
 
 def get_queue():
@@ -502,7 +496,7 @@ def send_one(email, smtpserver=None, auto_commit=True, now=False):
 		frappe.msgprint(_("Emails are muted"))
 		return
 
-	if cint(frappe.defaults.get_defaults().get("hold_queue")) == 1:
+	if cint(frappe.db.get_default("suspend_email_queue")) == 1:
 		return
 
 	if email.status not in ("Not Sent", "Partially Sent"):
@@ -542,9 +536,8 @@ def send_one(email, smtpserver=None, auto_commit=True, now=False):
 			if not frappe.flags.in_test:
 				method = get_hook_method("override_email_send")
 				if method:
-					queue = frappe.get_doc("Email Queue", email.name)
+					queue = frappe.get_cached_doc("Email Queue", email.name)
 					method(queue, email.sender, recipient.recipient, message)
-					return
 				else:
 					smtpserver.sess.sendmail(email.sender, recipient.recipient, message)
 
@@ -613,7 +606,7 @@ def send_one(email, smtpserver=None, auto_commit=True, now=False):
 	except Exception as e:
 		frappe.db.rollback()
 
-		if email.retry < 3:
+		if email.retry < get_email_retry_limit():
 			frappe.db.sql(
 				"""update `tabEmail Queue` set status='Not Sent', modified=%s, retry=retry+1 where name=%s""",
 				(now_datetime(), email.name),
@@ -641,9 +634,8 @@ def send_one(email, smtpserver=None, auto_commit=True, now=False):
 			print(frappe.get_traceback())
 			raise e
 
-		else:
-			# log to Error Log
-			frappe.log_error("frappe.email.queue.flush")
+		# log to Error Log
+		frappe.log_error(title="frappe.email.queue.flush")
 
 
 def prepare_message(email, recipient, recipients_list):
@@ -656,16 +648,16 @@ def prepare_message(email, recipient, recipients_list):
 	if frappe.conf.use_ssl and email_account.track_email_status:
 		# Using SSL => Publically available domain => Email Read Reciept Possible
 		message = message.replace(
-			"<!--email open check-->",
+			"<!--email_open_check-->",
 			quopri.encodestring(
-				'<img src="https://{}/api/method/frappe.core.doctype.communication.email.mark_email_as_seen?name={}"/>'.format(
-					frappe.local.site, email.communication
+				'<img src="{}/api/method/frappe.core.doctype.communication.email.mark_email_as_seen?name={}"/>'.format(
+					get_url(), email.communication
 				).encode()
 			).decode(),
 		)
 	else:
 		# No SSL => No Email Read Reciept
-		message = message.replace("<!--email open check-->", quopri.encodestring("".encode()).decode())
+		message = message.replace("<!--email_open_check-->", quopri.encodestring("".encode()).decode())
 
 	if (
 		email.add_unsubscribe_link and email.reference_doctype
@@ -678,7 +670,7 @@ def prepare_message(email, recipient, recipients_list):
 			email.unsubscribe_params,
 		)
 		message = message.replace(
-			"<!--unsubscribe url-->", quopri.encodestring(unsubscribe_url.encode()).decode()
+			"<!--unsubscribe_url-->", quopri.encodestring(unsubscribe_url.encode()).decode()
 		)
 
 	if email.expose_recipients == "header":
@@ -698,7 +690,7 @@ def prepare_message(email, recipient, recipients_list):
 			else:
 				email_sent_message = _("This email was sent to {0}").format(email_sent_to)
 			message = message.replace(
-				"<!--cc message-->", quopri.encodestring(email_sent_message.encode()).decode()
+				"<!--cc_message-->", quopri.encodestring(email_sent_message.encode()).decode()
 			)
 
 		message = message.replace("<!--recipient-->", recipient)
@@ -740,33 +732,26 @@ def prepare_message(email, recipient, recipients_list):
 
 
 def clear_outbox(days=None):
-	"""Remove low priority older than 31 days in Outbox or configured in Log Settings.
-	Note: Used separate query to avoid deadlock
-	"""
-	if not days:
-		days = 31
+	from frappe.query_builder import Interval
+	from frappe.query_builder.functions import Now
 
-	email_queues = frappe.db.sql_list(
-		"""SELECT `name` FROM `tabEmail Queue`
-		WHERE `priority`=0 AND `modified` < (NOW() - INTERVAL '{0}' DAY)""".format(
-			days
-		)
-	)
+	days = days or 31
+	email_queue = frappe.qb.DocType("Email Queue")
+	email_recipient = frappe.qb.DocType("Email Queue Recipient")
 
-	if email_queues:
-		frappe.db.sql(
-			"""DELETE FROM `tabEmail Queue` WHERE `name` IN ({0})""".format(
-				",".join(["%s"] * len(email_queues))
-			),
-			tuple(email_queues),
-		)
+	# Delete queue table
+	(
+		frappe.qb.from_(email_queue).delete().where(email_queue.modified < (Now() - Interval(days=days)))
+	).run()
 
-		frappe.db.sql(
-			"""DELETE FROM `tabEmail Queue Recipient` WHERE `parent` IN ({0})""".format(
-				",".join(["%s"] * len(email_queues))
-			),
-			tuple(email_queues),
-		)
+	# delete child tables, note that this has potential to leave some orphan
+	# child table behind if modified time was later than parent doc (rare).
+	# But it's safe since child table doesn't contain links.
+	(
+		frappe.qb.from_(email_recipient)
+		.delete()
+		.where(email_recipient.modified < (Now() - Interval(days=days)))
+	).run()
 
 
 def set_expiry_for_email_queue():
@@ -783,3 +768,7 @@ def set_expiry_for_email_queue():
 		AND (`send_after` IS NULL OR `send_after` < %(now)s)""",
 		{"now": now_datetime()},
 	)
+
+
+def get_email_retry_limit():
+	return cint(frappe.db.get_system_setting("email_retry_limit")) or 3

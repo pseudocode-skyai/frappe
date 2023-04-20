@@ -2,6 +2,7 @@
 // MIT License. See license.txt
 
 import deep_equal from "fast-deep-equal";
+import cloneDeepWith from "lodash/cloneDeepWith";
 
 frappe.provide("frappe.utils");
 
@@ -248,10 +249,10 @@ Object.assign(frappe.utils, {
 		});
 	},
 
-	html2text: function(html) {
-		let d = document.createElement('div');
-		d.innerHTML = html;
-		return d.textContent;
+	html2text: function (html) {
+		const parser = new DOMParser();
+		const dom = parser.parseFromString(html, "text/html");
+		return dom.body.textContent;
 	},
 
 	is_url: function(txt) {
@@ -916,6 +917,10 @@ Object.assign(frappe.utils, {
 		return deep_equal(a, b);
 	},
 
+	deep_clone(obj, customizer) {
+		return cloneDeepWith(obj, customizer);
+	},
+
 	file_name_ellipsis(filename, length) {
 		let first_part_length = length * 2 / 3;
 		let last_part_length = length - first_part_length;
@@ -1315,7 +1320,7 @@ Object.assign(frappe.utils, {
 			: summary.color ? summary.color.toLowerCase() : '';
 
 		return $(`<div class="summary-item">
-			<span class="summary-label">${summary.label}</span>
+			<span class="summary-label">${__(summary.label)}</span>
 			<div class="summary-value ${color}">${value}</div>
 		</div>`);
 	},
@@ -1355,5 +1360,9 @@ Object.assign(frappe.utils, {
 			return array;
 		}
 		return undefined;
+	},
+
+	is_current_user(user) {
+		return user === frappe.session.user;
 	}
 });

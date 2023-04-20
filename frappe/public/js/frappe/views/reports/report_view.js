@@ -33,7 +33,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 					this.filters = this.report_doc.json.filters;
 					this.order_by = this.report_doc.json.order_by;
 					this.add_totals_row = this.report_doc.json.add_totals_row;
-					this.page_title = this.report_name;
+					this.page_title = __(this.report_name);
 					this.page_length = this.report_doc.json.page_length || 20;
 					this.order_by = this.report_doc.json.order_by || 'modified desc';
 					this.chart_args = this.report_doc.json.chart_args;
@@ -42,12 +42,22 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 			this.add_totals_row = this.view_user_settings.add_totals_row || 0;
 			this.chart_args = this.view_user_settings.chart_args;
 		}
+		return this.get_list_view_settings();
 	}
 
 	setup_view() {
 		this.setup_columns();
 		super.setup_new_doc_event();
-		this.page.main.addClass('report-view');
+		this.setup_events();
+		this.page.main.addClass("report-view");
+	}
+
+	setup_events() {
+		if (this.list_view_settings && this.list_view_settings.disable_auto_refresh) {
+			return;
+		}
+		frappe.socketio.doctype_subscribe(this.doctype);
+		frappe.realtime.on("list_update", (data) => this.on_update(data));
 	}
 
 	setup_page() {
@@ -208,6 +218,9 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 	}
 
 	render_count() {
+		if (this.list_view_settings && this.list_view_settings.disable_count) {
+			return;
+		}
 		let $list_count = this.$paging_area.find('.list-count');
 		if (!$list_count.length) {
 			$list_count = $('<span>')
@@ -1528,6 +1541,12 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 					frappe.set_route('List', 'User Permission', args);
 				}
 			});
+		}
+
+		if (frappe.user.has_role("System Manager")) {
+			if (this.get_view_settings) {
+				items.push(this.get_view_settings());
+			}
 		}
 
 		return items.map(i => Object.assign(i, { standard: true }));

@@ -15,13 +15,24 @@ import sys
 import traceback
 
 import six
+from ldap3.core.exceptions import LDAPException
 
 import frappe
 from frappe.utils import cstr, encode
 
+EXCLUDE_EXCEPTIONS = (
+	frappe.AuthenticationError,
+	frappe.CSRFTokenError,  # CSRF covers OAuth too
+	frappe.SecurityException,
+	LDAPException,
+)
+
 
 def make_error_snapshot(exception):
 	if frappe.conf.disable_error_snapshot:
+		return
+
+	if isinstance(exception, EXCLUDE_EXCEPTIONS):
 		return
 
 	logger = frappe.logger(with_more_info=True)
@@ -89,7 +100,8 @@ def get_snapshot(exception, context=10):
 
 		def reader(lnum=[lnum]):
 			try:
-				return linecache.getline(file, lnum[0])
+				# B023: function is evaluated immediately, binding not necessary
+				return linecache.getline(file, lnum[0])  # noqa: B023
 			finally:
 				lnum[0] += 1
 

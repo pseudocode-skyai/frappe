@@ -215,7 +215,6 @@ scheduler_events = {
 		"frappe.desk.doctype.event.event.send_event_digest",
 		"frappe.sessions.clear_expired_sessions",
 		"frappe.email.doctype.notification.notification.trigger_daily_alerts",
-		"frappe.utils.scheduler.restrict_scheduler_events_if_dormant",
 		"frappe.website.doctype.personal_data_deletion_request.personal_data_deletion_request.remove_unverified_record",
 		"frappe.desk.form.document_follow.send_daily_updates",
 		"frappe.social.doctype.energy_point_settings.energy_point_settings.allocate_review_points",
@@ -279,7 +278,7 @@ setup_wizard_exception = [
 	"frappe.desk.page.setup_wizard.setup_wizard.log_setup_wizard_exception",
 ]
 
-before_migrate = ["frappe.patches.v11_0.sync_user_permission_doctype_before_migrate.execute"]
+before_migrate = []
 after_migrate = ["frappe.website.doctype.website_theme.website_theme.after_migrate"]
 
 otp_methods = ["OTP App", "Email", "SMS"]
@@ -368,4 +367,19 @@ global_search_doctypes = {
 	]
 }
 
-translated_search_doctypes = ["DocType", "Role", "Country", "Gender", "Salutation"]
+# Request Hooks
+before_request = [
+	"frappe.recorder.record",
+	"frappe.monitor.start",
+	"frappe.rate_limiter.apply",
+]
+after_request = ["frappe.rate_limiter.update", "frappe.monitor.stop", "frappe.recorder.dump"]
+
+# Background Job Hooks
+before_job = [
+	"frappe.monitor.start",
+]
+after_job = [
+	"frappe.monitor.stop",
+	"frappe.utils.file_lock.release_document_locks",
+]

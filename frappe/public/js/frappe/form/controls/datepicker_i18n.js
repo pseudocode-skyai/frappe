@@ -22,10 +22,10 @@ import "air-datepicker/dist/js/i18n/datepicker.zh.js";
 		months: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'اكتوبر', 'نوفمبر', 'ديسمبر'],
 		monthsShort: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'اكتوبر', 'نوفمبر', 'ديسمبر'],
 		today: 'اليوم',
-		clear: 'Clear',
+		clear: 'حذف',
 		dateFormat: 'dd/mm/yyyy',
 		timeFormat: 'hh:ii aa',
-		firstDay: 0
+		firstDay: 6
 	};
 })(jQuery);
 
@@ -58,5 +58,46 @@ import "air-datepicker/dist/js/i18n/datepicker.zh.js";
 		dateFormat: 'dd/mm/yyyy',
 		timeFormat: 'hh:ii',
 		firstDay: 1
+	};
+})(jQuery);
+
+(function ($) {
+	$.fn.datepicker.language["tr"] = {
+		days: ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"],
+		daysShort: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"],
+		daysMin: ["Pz", "Pt", "Sa", "Ça", "Pe", "Cu", "Ct"],
+		months: [
+			"Ocak",
+			"Şubat",
+			"Mart",
+			"Nisan",
+			"Mayıs",
+			"Haziran",
+			"Temmuz",
+			"Ağustos",
+			"Eylül",
+			"Ekim",
+			"Kasım",
+			"Aralık",
+		],
+		monthsShort: [
+			"Oca",
+			"Şub",
+			"Mar",
+			"Nis",
+			"May",
+			"Haz",
+			"Tem",
+			"Ağu",
+			"Eyl",
+			"Eki",
+			"Kas",
+			"Ara",
+		],
+		today: "Bugün",
+		clear: "Temizle",
+		dateFormat: "dd.mm.yyyy",
+		timeFormat: "hh:ii",
+		firstDay: 1,
 	};
 })(jQuery);

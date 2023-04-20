@@ -15,7 +15,7 @@ from frappe import _
 from frappe.core.doctype.access_log.access_log import make_access_log
 from frappe.core.doctype.document_share_key.document_share_key import is_expired
 from frappe.modules import get_doc_path
-from frappe.utils import cint, sanitize_html, strip_html
+from frappe.utils import cint, escape_html, strip_html
 from frappe.utils.jinja import is_rtl
 
 no_cache = 1
@@ -28,12 +28,11 @@ def get_context(context):
 	"""Build context for print"""
 	if not ((frappe.form_dict.doctype and frappe.form_dict.name) or frappe.form_dict.doc):
 		return {
-			"body": sanitize_html(
-				"""<h1>Error</h1>
+			"body": f"""
+				<h1>Error</h1>
 				<p>Parameters doctype and name required</p>
-				<pre>%s</pre>"""
-				% repr(frappe.form_dict)
-			)
+				<pre>{escape_html(frappe.as_json(frappe.form_dict, indent=2))}</pre>
+				"""
 		}
 
 	if frappe.form_dict.doc:
@@ -306,8 +305,8 @@ def validate_print_permission(doc):
 		if frappe.has_permission(doc.doctype, ptype, doc) or frappe.has_website_permission(doc):
 			return
 
-	key = frappe.form_dict.get("key")
-	if key:
+	key = frappe.form_dict.key
+	if key and isinstance(key, str):
 		validate_key(key, doc)
 	else:
 		raise frappe.PermissionError(_("You do not have permission to view this document"))

@@ -52,20 +52,26 @@ class MariaDBTable(DBTable):
 		add_index_query = []
 		drop_index_query = []
 
-		columns_to_modify = set(self.change_type + self.add_unique + self.set_default)
-
 		for col in self.add_column:
 			add_column_query.append("ADD COLUMN `{}` {}".format(col.fieldname, col.get_definition()))
 
+		columns_to_modify = set(self.change_type + self.set_default)
 		for col in columns_to_modify:
-			modify_column_query.append("MODIFY `{}` {}".format(col.fieldname, col.get_definition()))
+			modify_column_query.append(
+				f"MODIFY `{col.fieldname}` {col.get_definition(for_modification=True)}"
+			)
+
+		for col in self.add_unique:
+			modify_column_query.append(
+				f"ADD UNIQUE INDEX IF NOT EXISTS {col.fieldname} (`{col.fieldname}`)"
+			)
 
 		for col in self.add_index:
 			# if index key does not exists
 			if not frappe.db.has_index(self.table_name, col.fieldname + "_index"):
 				add_index_query.append("ADD INDEX `{}_index`(`{}`)".format(col.fieldname, col.fieldname))
 
-		for col in self.drop_index + self.drop_unique:
+		for col in {*self.drop_index, *self.drop_unique}:
 			if col.fieldname != "name":  # primary key
 				current_column = self.current_columns.get(col.fieldname.lower())
 				unique_constraint_changed = current_column.unique != col.unique

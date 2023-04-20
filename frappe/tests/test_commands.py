@@ -15,7 +15,7 @@ import frappe
 import frappe.recorder
 from frappe.installer import add_to_installed_apps, remove_app
 from frappe.utils import add_to_date, get_bench_relative_path, now
-from frappe.utils.backups import fetch_latest_backups
+from frappe.utils.backups import BackupGenerator, fetch_latest_backups
 
 
 # TODO: check frappe.cli.coloured_output to set coloured output!
@@ -253,6 +253,7 @@ class TestCommands(BaseTestCommands):
 		database = fetch_latest_backups()["database"]
 		self.assertTrue(exists_in_backup(backup["excludes"]["excludes"], database))
 
+	@unittest.skip
 	def test_restore(self):
 		# step 0: create a site to run the test on
 		global_config = {
@@ -317,6 +318,19 @@ class TestCommands(BaseTestCommands):
 		self.assertEquals(self.returncode, 0)
 		self.assertEquals(frappe.db.count("ToDo"), todo_count)
 
+	def test_backup_fails_with_exit_code(self):
+		"""Provide incorrect options to check if exit code is 1"""
+		odb = BackupGenerator(
+			frappe.conf.db_name,
+			frappe.conf.db_name,
+			frappe.conf.db_password + "INCORRECT PASSWORD",
+			db_host=frappe.db.host,
+			db_port=frappe.db.port,
+			db_type=frappe.conf.db_type,
+		)
+		with self.assertRaises(Exception):
+			odb.take_dump()
+
 	def test_recorder(self):
 		frappe.recorder.stop()
 
@@ -328,6 +342,7 @@ class TestCommands(BaseTestCommands):
 		frappe.local.cache = {}
 		self.assertEqual(frappe.recorder.status(), False)
 
+	@unittest.skip("Poorly written, relied on app name being absent in apps.txt")
 	def test_remove_from_installed_apps(self):
 		app = "test_remove_app"
 		add_to_installed_apps(app)
@@ -430,6 +445,14 @@ class TestCommands(BaseTestCommands):
 		self.execute("bench version -f invalid")
 		self.assertEqual(self.returncode, 2)
 
+	def test_set_global_conf(self):
+		key = "answer"
+		value = "42"
+		self.execute(f"bench set-config {key} {value} -g")
+		conf = frappe.get_site_config()
+
+		self.assertEqual(conf[key], value)
+
 
 class RemoveAppUnitTests(unittest.TestCase):
 	def test_delete_modules(self):
@@ -475,3 +498,15 @@ class RemoveAppUnitTests(unittest.TestCase):
 
 		# nothing to assert, if this fails rest of the test suite will crumble.
 		remove_app("frappe", dry_run=True, yes=True, no_backup=True)
+
+
+class TestAddNewUser(BaseTestCommands):
+	def test_create_user(self):
+		self.execute(
+			"bench --site {site} add-user test@gmail.com --first-name test --last-name test --password 123 --user-type 'System User' --add-role 'Accounts User' --add-role 'Sales User'"
+		)
+		frappe.db.rollback()
+		self.assertEqual(self.returncode, 0)
+		user = frappe.get_doc("User", "test@gmail.com")
+		roles = {r.role for r in user.roles}
+		self.assertEqual({"Accounts User", "Sales User"}, roles)

@@ -235,12 +235,13 @@ def get_company_address(company):
 def address_query(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import get_match_cond
 
+	doctype = "Address"
 	link_doctype = filters.pop("link_doctype")
 	link_name = filters.pop("link_name")
 
 	condition = ""
-	meta = frappe.get_meta("Address")
-	for fieldname, value in iteritems(filters):
+	meta = frappe.get_meta(doctype)
+	for fieldname, value in filters.items():
 		if meta.get_field(fieldname) or fieldname in frappe.db.DEFAULT_COLUMNS:
 			condition += " and {field}={value}".format(field=fieldname, value=frappe.db.escape(value))
 
@@ -260,19 +261,23 @@ def address_query(doctype, txt, searchfield, start, page_len, filters):
 		"""select
 			`tabAddress`.name, `tabAddress`.city, `tabAddress`.country
 		from
-			`tabAddress`, `tabDynamic Link`
+			`tabAddress`
+		join `tabDynamic Link`
+			on (`tabDynamic Link`.parent = `tabAddress`.name and `tabDynamic Link`.parenttype = 'Address')
 		where
-			`tabDynamic Link`.parent = `tabAddress`.name and
-			`tabDynamic Link`.parenttype = 'Address' and
 			`tabDynamic Link`.link_doctype = %(link_doctype)s and
 			`tabDynamic Link`.link_name = %(link_name)s and
 			ifnull(`tabAddress`.disabled, 0) = 0 and
 			({search_condition})
 			{mcond} {condition}
 		order by
-			if(locate(%(_txt)s, `tabAddress`.name), locate(%(_txt)s, `tabAddress`.name), 99999),
+			case
+				when locate(%(_txt)s, `tabAddress`.name) != 0
+				then locate(%(_txt)s, `tabAddress`.name)
+				else 99999
+			end,
 			`tabAddress`.idx desc, `tabAddress`.name
-		limit %(start)s, %(page_len)s """.format(
+		limit %(page_len)s offset %(start)s""".format(
 			mcond=get_match_cond(doctype),
 			key=searchfield,
 			search_condition=search_condition,

@@ -17,7 +17,7 @@ from frappe.desk.doctype.notification_log.notification_log import enqueue_create
 from frappe.integrations.doctype.slack_webhook_url.slack_webhook_url import send_slack_message
 from frappe.model.document import Document
 from frappe.modules.utils import export_module_json, get_doc_module
-from frappe.utils import add_to_date, is_html, nowdate, parse_val, validate_email_address
+from frappe.utils import add_to_date, cast, is_html, nowdate, validate_email_address
 from frappe.utils.jinja import validate_template
 from frappe.utils.safe_exec import get_safe_globals
 
@@ -50,6 +50,7 @@ class Notification(Document):
 		frappe.cache().hdel("notifications", self.document_type)
 
 	def on_update(self):
+		frappe.cache().hdel("notifications", self.document_type)
 		path = export_module_json(self, self.is_standard, self.module)
 		if path:
 			# js
@@ -146,7 +147,7 @@ def get_context(context):
 			if self.channel == "System Notification" or self.send_system_notification:
 				self.create_system_notification(doc, context)
 
-		except:
+		except Exception:
 			frappe.log_error(title="Failed to send notification", message=frappe.get_traceback())
 
 		if self.set_property_after_alert:
@@ -301,7 +302,7 @@ def get_context(context):
 
 			# For sending emails to specified role
 			if recipient.receiver_by_role:
-				emails = get_info_based_on_role(recipient.receiver_by_role, "email")
+				emails = get_info_based_on_role(recipient.receiver_by_role, "email", ignore_permissions=True)
 
 				for email in emails:
 					recipients = recipients + email.split("\n")
@@ -420,7 +421,7 @@ def trigger_notifications(doc, method=None):
 				frappe.db.commit()
 
 
-def evaluate_alert(doc, alert, event):
+def evaluate_alert(doc: Document, alert, event):
 	from jinja2 import TemplateError
 
 	try:
@@ -442,8 +443,8 @@ def evaluate_alert(doc, alert, event):
 			doc_before_save = doc.get_doc_before_save()
 			field_value_before_save = doc_before_save.get(alert.value_changed) if doc_before_save else None
 
-			field_value_before_save = parse_val(field_value_before_save)
-			if doc.get(alert.value_changed) == field_value_before_save:
+			fieldtype = doc.meta.get_field(alert.value_changed).fieldtype
+			if cast(fieldtype, doc.get(alert.value_changed)) == cast(fieldtype, field_value_before_save):
 				# value not changed
 				return
 
@@ -453,16 +454,17 @@ def evaluate_alert(doc, alert, event):
 			doc.reload()
 		alert.send(doc)
 	except TemplateError:
-		frappe.throw(
-			_("Error while evaluating Notification {0}. Please fix your template.").format(alert)
+		message = _("Error while evaluating Notification {0}. Please fix your template.").format(
+			frappe.utils.get_link_to_form("Notification", alert.name)
 		)
+		frappe.throw(message, title=_("Error in Notification"))
 	except Exception as e:
-		error_log = frappe.log_error(message=frappe.get_traceback(), title=str(e))
-		frappe.throw(
-			_("Error in Notification: {}").format(
-				frappe.utils.get_link_to_form("Error Log", error_log.name)
-			)
-		)
+		title = str(e)
+		message = frappe.get_traceback()
+		frappe.log_error(message=message, title=title)
+
+		msg = f"<details><summary>{title}</summary>{message}</details>"
+		frappe.throw(msg, title=_("Error in Notification"))
 
 
 def get_context(doc):

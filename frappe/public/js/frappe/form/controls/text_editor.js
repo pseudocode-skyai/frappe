@@ -97,7 +97,7 @@ frappe.ui.form.ControlTextEditor = frappe.ui.form.ControlCode.extend({
 
 	bind_events() {
 		this.quill.on('text-change', frappe.utils.debounce((delta, oldDelta, source) => {
-			if (!this.is_quill_dirty(source)) return;
+			if (source === 'api') return;
 
 			const input_value = this.get_input_value();
 			this.parse_validate_and_set_in_model(input_value);
@@ -156,12 +156,6 @@ frappe.ui.form.ControlTextEditor = frappe.ui.form.ControlCode.extend({
 		}
 	},
 
-	is_quill_dirty(source) {
-		if (source === 'api') return false;
-		let input_value = this.get_input_value();
-		return this.value !== input_value;
-	},
-
 	get_quill_options() {
 		return {
 			modules: {
@@ -177,7 +171,7 @@ frappe.ui.form.ControlTextEditor = frappe.ui.form.ControlCode.extend({
 		return [
 			[{ header: [1, 2, 3, false] }],
 			[{ size: font_sizes }],
-			['bold', 'italic', 'underline', 'clean'],
+			['bold', 'italic', 'underline', 'strike', 'clean'],
 			[{ 'color': [] }, { 'background': [] }],
 			['blockquote', 'code-block'],
 			// Adding Direction tool to give the user the ability to change text direction.
@@ -233,6 +227,18 @@ frappe.ui.form.ControlTextEditor = frappe.ui.form.ControlCode.extend({
 			value = `<div class="ql-editor read-mode">${value}</div>`;
 		}
 
+		// quill keeps ol as a common container for both type of lists
+		// and uses css for appearances, this is not semantic
+		// so we convert ol to ul if it is unordered
+		let $value = $(value);
+		$value.find('ol li[data-list=bullet]:first-child').each((i, li) => {
+			let $li = $(li);
+			let $parent = $li.parent();
+			let $children = $parent.children();
+			let $ul = $('<ul>').append($children);
+			$parent.replaceWith($ul);
+		});
+		value = $value.prop("outerHTML");
 		return value;
 	},
 

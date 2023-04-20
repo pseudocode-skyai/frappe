@@ -15,8 +15,8 @@ from frappe import _
 from frappe.core.utils import ljust_list
 from frappe.model.utils import render_include
 from frappe.modules import get_module_path, scrub
+from frappe.monitor import add_data_to_monitor
 from frappe.permissions import get_role_permissions
-from frappe.translate import send_translations
 from frappe.utils import (
 	cint,
 	cstr,
@@ -25,12 +25,14 @@ from frappe.utils import (
 	get_html_format,
 	get_url_to_form,
 	gzip_decompress,
+	sbool,
 )
 
 
 def get_report_doc(report_name):
 	doc = frappe.get_doc("Report", report_name)
 	doc.custom_columns = []
+	doc.custom_filters = []
 
 	if doc.report_type == "Custom Report":
 		custom_report_doc = doc
@@ -40,7 +42,8 @@ def get_report_doc(report_name):
 		if custom_report_doc.json:
 			data = json.loads(custom_report_doc.json)
 			if data:
-				doc.custom_columns = data["columns"]
+				doc.custom_columns = data.get("columns")
+				doc.custom_filters = data.get("filters")
 		doc.is_custom_report = True
 
 	if not doc.is_permitted():
@@ -204,10 +207,6 @@ def get_script(report_name):
 	if not script:
 		script = "frappe.query_reports['%s']={}" % report_name
 
-	# load translations
-	if frappe.lang != "en":
-		send_translations(frappe.get_lang_dict("report", report_name))
-
 	return {
 		"script": render_include(script),
 		"html_format": html_format,
@@ -225,6 +224,7 @@ def run(
 	custom_columns=None,
 	is_tree=False,
 	parent_field=None,
+	are_default_filters=True,
 ):
 	report = get_report_doc(report_name)
 	if not user:
@@ -236,6 +236,9 @@ def run(
 		)
 
 	result = None
+
+	if sbool(are_default_filters) and report.custom_filters:
+		filters = report.custom_filters
 
 	if (
 		report.prepared_report
@@ -254,8 +257,12 @@ def run(
 		result = get_prepared_report_result(report, filters, dn, user)
 	else:
 		result = generate_report_result(report, filters, user, custom_columns, is_tree, parent_field)
+		add_data_to_monitor(report=report.reference_report or report.name)
 
 	result["add_total_row"] = report.add_total_row and not result.get("skip_total_row", False)
+
+	if sbool(are_default_filters) and report.custom_filters:
+		result["custom_filters"] = report.custom_filters
 
 	return result
 
@@ -397,10 +404,10 @@ def handle_duration_fieldtype_values(result, columns):
 			for entry in range(0, len(result)):
 				row = result[entry]
 				if isinstance(row, dict):
-					val_in_seconds = row[col.fieldname]
+					val_in_seconds = row[col.get("fieldname")]
 					if val_in_seconds:
 						duration_val = format_duration(val_in_seconds)
-						row[col.fieldname] = duration_val
+						row[col.get("fieldname")] = duration_val
 				else:
 					val_in_seconds = row[i]
 					if val_in_seconds:
@@ -514,7 +521,7 @@ def add_total_row(result, columns, meta=None, is_tree=False, parent_field=None):
 def get_data_for_custom_field(doctype, fieldname, field=None):
 
 	if not frappe.has_permission(doctype, "read"):
-		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+		frappe.throw(_("Not Permitted to read {0}").format(doctype), frappe.PermissionError)
 
 	if field:
 		custom_field = field + " as " + fieldname
@@ -540,7 +547,7 @@ def get_data_for_custom_report(columns):
 
 
 @frappe.whitelist()
-def save_report(reference_report, report_name, columns):
+def save_report(reference_report, report_name, columns, filters):
 	report_doc = get_report_doc(reference_report)
 
 	docname = frappe.db.exists(
@@ -556,6 +563,7 @@ def save_report(reference_report, report_name, columns):
 		report = frappe.get_doc("Report", docname)
 		existing_jd = json.loads(report.json)
 		existing_jd["columns"] = json.loads(columns)
+		existing_jd["filters"] = json.loads(filters)
 		report.update({"json": json.dumps(existing_jd, separators=(",", ":"))})
 		report.save()
 		frappe.msgprint(_("Report updated successfully"))
@@ -566,7 +574,7 @@ def save_report(reference_report, report_name, columns):
 			{
 				"doctype": "Report",
 				"report_name": report_name,
-				"json": f'{{"columns":{columns}}}',
+				"json": f'{{"columns":{columns},"filters":{filters}}}',
 				"ref_doctype": report_doc.ref_doctype,
 				"is_standard": "No",
 				"report_type": "Custom Report",

@@ -21,6 +21,7 @@ from frappe.desk.utils import slug
 DATE_FORMAT = "%Y-%m-%d"
 TIME_FORMAT = "%H:%M:%S.%f"
 DATETIME_FORMAT = DATE_FORMAT + " " + TIME_FORMAT
+MARIADB_SPECIFIC_COMMENT = re.compile(r"#.*")
 
 
 class Weekday(Enum):
@@ -48,8 +49,7 @@ def is_invalid_date_string(date_string):
 	)
 
 
-# datetime functions
-def getdate(string_date: Optional[str] = None):
+def getdate(string_date: Optional[str] = None, parse_day_first: bool = False):
 	"""
 	Converts string date (yyyy-mm-dd) to datetime.date object.
 	If no input is provided, current date is returned.
@@ -68,7 +68,7 @@ def getdate(string_date: Optional[str] = None):
 	if is_invalid_date_string(string_date):
 		return None
 	try:
-		return parser.parse(string_date).date()
+		return parser.parse(string_date, dayfirst=parse_day_first).date()
 	except ParserError:
 		frappe.throw(
 			frappe._("{} is not a valid date string.").format(frappe.bold(string_date)),
@@ -451,7 +451,7 @@ def get_user_time_format():
 	return frappe.local.user_time_format or "HH:mm:ss"
 
 
-def format_date(string_date=None, format_string=None):
+def format_date(string_date=None, format_string=None, parse_day_first: bool = False):
 	"""Converts the given string date to :data:`user_date_format`
 	User format specified in defaults
 
@@ -467,7 +467,7 @@ def format_date(string_date=None, format_string=None):
 	if not string_date:
 		return ""
 
-	date = getdate(string_date)
+	date = getdate(string_date, parse_day_first)
 	if not format_string:
 		format_string = get_user_date_format()
 	format_string = format_string.replace("mm", "MM").replace("Y", "y")
@@ -703,7 +703,7 @@ def has_common(l1, l2):
 def cast_fieldtype(fieldtype, value, show_warning=True):
 	if show_warning:
 		message = (
-			"Function `frappe.utils.data.cast` has been deprecated in favour"
+			"Function `frappe.utils.data.cast_fieldtype` has been deprecated in favour"
 			" of `frappe.utils.data.cast`. Use the newer util for safer type casting."
 		)
 		secho(message, fg="yellow")
@@ -858,7 +858,7 @@ def floor(s):
 	"""
 	try:
 		num = cint(math.floor(flt(s)))
-	except:
+	except Exception:
 		num = 0
 	return num
 
@@ -880,7 +880,7 @@ def ceil(s):
 	"""
 	try:
 		num = cint(math.ceil(flt(s)))
-	except:
+	except Exception:
 		num = 0
 	return num
 
@@ -1335,15 +1335,15 @@ def pretty_date(iso_datetime):
 		return _("Yesterday")
 	elif dt_diff_days < 7.0:
 		return _("{0} days ago").format(cint(dt_diff_days))
-	elif dt_diff_days < 12:
+	elif dt_diff_days < 14:
 		return _("1 week ago")
 	elif dt_diff_days < 31.0:
-		return _("{0} weeks ago").format(cint(math.ceil(dt_diff_days / 7.0)))
-	elif dt_diff_days < 46:
+		return _("{0} weeks ago").format(dt_diff_days // 7)
+	elif dt_diff_days < 61.0:
 		return _("1 month ago")
 	elif dt_diff_days < 365.0:
-		return _("{0} months ago").format(cint(math.ceil(dt_diff_days / 30.0)))
-	elif dt_diff_days < 550.0:
+		return _("{0} months ago").format(dt_diff_days // 30)
+	elif dt_diff_days < 730.0:
 		return _("1 year ago")
 	else:
 		return "{0} years ago".format(cint(math.floor(dt_diff_days / 365.0)))
@@ -1518,7 +1518,7 @@ def get_url_to_report(name, report_type=None, doctype=None):
 
 def get_url_to_report_with_filters(name, filters, report_type=None, doctype=None):
 	if report_type == "Report Builder":
-		return get_url(uri="/app/{0}/view/report?{1}".format(quoted(doctype), filters))
+		return get_url(uri="/app/{0}/view/report?{1}".format(quoted(slug(doctype)), filters))
 	else:
 		return get_url(uri="/app/query-report/{0}?{1}".format(quoted(name), filters))
 
@@ -1681,8 +1681,11 @@ def sanitize_column(column_name):
 
 	from frappe import _
 
-	regex = re.compile("^.*[,'();].*")
 	column_name = sqlparse.format(column_name, strip_comments=True, keyword_case="lower")
+	if frappe.db and frappe.db.db_type == "mariadb":
+		# strip mariadb specific comments which are like python single line comments
+		column_name = MARIADB_SPECIFIC_COMMENT.sub("", column_name)
+
 	blacklisted_keywords = [
 		"select",
 		"create",
@@ -1698,6 +1701,7 @@ def sanitize_column(column_name):
 	def _raise_exception():
 		frappe.throw(_("Invalid field name {0}").format(column_name), frappe.DataError)
 
+	regex = re.compile("^.*[,'();].*")
 	if "ifnull" in column_name:
 		if regex.match(column_name):
 			# to avoid and, or
@@ -1728,7 +1732,7 @@ def expand_relative_urls(html):
 	def _expand_relative_urls(match):
 		to_expand = list(match.groups())
 
-		if not to_expand[2].startswith("mailto") and not to_expand[2].startswith("data:"):
+		if not to_expand[2].startswith(("mailto", "data:", "tel:")):
 			if not to_expand[2].startswith("/"):
 				to_expand[2] = "/" + to_expand[2]
 			to_expand.insert(2, url)
@@ -1897,6 +1901,11 @@ def guess_date_format(date_string: str) -> str:
 	date_format = _get_date_format(date_string)
 	if date_format:
 		return date_format
+
+	# check if time format can be guessed
+	time_format = _get_time_format(date_string)
+	if time_format:
+		return time_format
 
 	# date_string doesnt look like date, it can have a time part too
 	# split the date string into date and time parts

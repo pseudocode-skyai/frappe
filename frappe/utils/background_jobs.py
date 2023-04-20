@@ -19,6 +19,10 @@ import frappe.monitor
 from frappe import _
 from frappe.utils import cstr
 
+# TTL to keep RQ job logs in redis for.
+RQ_JOB_FAILURE_TTL = 7 * 24 * 60 * 60  # 7 days instead of 1 year (default)
+RQ_RESULTS_TTL = 10 * 60
+
 
 @lru_cache()
 def get_queues_timeout():
@@ -89,8 +93,14 @@ def enqueue(
 			{"queue": queue, "is_async": is_async, "timeout": timeout, "queue_args": queue_args}
 		)
 		return frappe.flags.enqueue_after_commit
-	else:
-		return q.enqueue_call(execute_job, timeout=timeout, kwargs=queue_args)
+
+	return q.enqueue_call(
+		execute_job,
+		timeout=timeout,
+		kwargs=queue_args,
+		failure_ttl=RQ_JOB_FAILURE_TTL,
+		result_ttl=RQ_RESULTS_TTL,
+	)
 
 
 def enqueue_doc(
@@ -115,6 +125,7 @@ def run_doc_method(doctype, name, doc_method, **kwargs):
 
 def execute_job(site, method, event, job_name, kwargs, user=None, is_async=True, retry=0):
 	"""Executes job in a worker, performs commit/rollback and logs if there is any error"""
+	retval = None
 	if is_async:
 		frappe.connect(site)
 		if os.environ.get("CI"):
@@ -129,9 +140,11 @@ def execute_job(site, method, event, job_name, kwargs, user=None, is_async=True,
 	else:
 		method_name = cstr(method.__name__)
 
-	frappe.monitor.start("job", method_name, kwargs)
+	for before_job_task in frappe.get_hooks("before_job"):
+		frappe.call(before_job_task, method=method_name, kwargs=kwargs, transaction_type="job")
+
 	try:
-		method(**kwargs)
+		retval = method(**kwargs)
 
 	except (frappe.db.InternalError, frappe.RetryBackgroundJobError) as e:
 		frappe.db.rollback()
@@ -153,7 +166,7 @@ def execute_job(site, method, event, job_name, kwargs, user=None, is_async=True,
 			frappe.log_error(title=method_name)
 			raise
 
-	except:
+	except Exception:
 		frappe.db.rollback()
 		frappe.log_error(title=method_name)
 		frappe.db.commit()
@@ -162,9 +175,12 @@ def execute_job(site, method, event, job_name, kwargs, user=None, is_async=True,
 
 	else:
 		frappe.db.commit()
+		return retval
 
 	finally:
-		frappe.monitor.stop()
+		for after_job_task in frappe.get_hooks("after_job"):
+			frappe.call(after_job_task, method=method_name, kwargs=kwargs, result=retval)
+
 		if is_async:
 			frappe.destroy()
 
@@ -183,7 +199,11 @@ def start_worker(queue=None, quiet=False):
 		logging_level = "INFO"
 		if quiet:
 			logging_level = "WARNING"
-		Worker(queues, name=get_worker_name(queue)).work(logging_level=logging_level)
+		Worker(queues, name=get_worker_name(queue)).work(
+			logging_level=logging_level,
+			date_format="%Y-%m-%d %H:%M:%S",
+			log_format="%(asctime)s,%(msecs)03d %(message)s",
+		)
 
 
 def get_worker_name(queue):

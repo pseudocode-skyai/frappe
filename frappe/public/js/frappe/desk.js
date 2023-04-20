@@ -33,15 +33,6 @@ frappe.Application = Class.extend({
 		frappe.socketio.init();
 		frappe.model.init();
 
-		if(frappe.boot.status==='failed') {
-			frappe.msgprint({
-				message: frappe.boot.error,
-				title: __('Session Start Failed'),
-				indicator: 'red',
-			});
-			throw 'boot failed';
-		}
-
 		this.setup_frappe_vue();
 		this.load_bootinfo();
 		this.load_user_permissions();
@@ -128,17 +119,6 @@ frappe.Application = Class.extend({
 		this.link_preview = new frappe.ui.LinkPreview();
 
 		if (!frappe.boot.developer_mode) {
-			setInterval(function() {
-				frappe.call({
-					method: 'frappe.core.page.background_jobs.background_jobs.get_scheduler_status',
-					callback: function(r) {
-						if (r.message[0] == __("Inactive")) {
-							frappe.call('frappe.utils.scheduler.activate_scheduler');
-						}
-					}
-				});
-			}, 300000); // check every 5 minutes
-
 			if (frappe.user.has_role("System Manager")) {
 				setInterval(function() {
 					frappe.call({
@@ -161,7 +141,6 @@ frappe.Application = Class.extend({
 	},
 
 	set_route() {
-		frappe.flags.setting_original_route = true;
 		if (frappe.boot && localStorage.getItem("session_last_route")) {
 			frappe.set_route(localStorage.getItem("session_last_route"));
 			localStorage.removeItem("session_last_route");
@@ -169,7 +148,6 @@ frappe.Application = Class.extend({
 			// route to home page
 			frappe.router.route();
 		}
-		frappe.after_ajax(() => frappe.flags.setting_original_route = false);
 		frappe.router.on('change', () => {
 			$(".tooltip").hide();
 		});

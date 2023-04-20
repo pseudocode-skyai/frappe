@@ -1,11 +1,22 @@
 import unittest
 from random import choice
+from threading import Thread
+from time import time
+from unittest.mock import patch
 
 import requests
 from semantic_version import Version
 
 import frappe
-from frappe.utils import get_site_url
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import get_site_url, get_test_client
+
+try:
+	_site = frappe.local.site
+except Exception:
+	_site = None
+
+authorization_token = None
 
 
 def maintain_state(f):
@@ -163,3 +174,101 @@ class TestMethodAPI(unittest.TestCase):
 		self.assertEqual(response.status_code, 200)
 		self.assertIsInstance(response.json(), dict)
 		self.assertEqual(response.json()["message"], "pong")
+
+
+class FrappeAPITestCase(FrappeTestCase):
+	SITE = frappe.local.site
+	SITE_URL = get_site_url(SITE)
+	RESOURCE_URL = f"{SITE_URL}/api/resource"
+	TEST_CLIENT = get_test_client()
+
+	@property
+	def sid(self):
+		if not getattr(self, "_sid", None):
+			from frappe.auth import CookieManager, LoginManager
+			from frappe.utils import set_request
+
+			set_request(path="/")
+			frappe.local.cookie_manager = CookieManager()
+			frappe.local.login_manager = LoginManager()
+			frappe.local.login_manager.login_as("Administrator")
+			self._sid = frappe.session.sid
+
+		return self._sid
+
+	def get(self, path, params=None, **kwargs):
+		return make_request(target=self.TEST_CLIENT.get, args=(path,), kwargs={"data": params, **kwargs})
+
+	def post(self, path, data, **kwargs):
+		return make_request(target=self.TEST_CLIENT.post, args=(path,), kwargs={"data": data, **kwargs})
+
+	def put(self, path, data, **kwargs):
+		return make_request(target=self.TEST_CLIENT.put, args=(path,), kwargs={"data": data, **kwargs})
+
+	def delete(self, path, **kwargs):
+		return make_request(target=self.TEST_CLIENT.delete, args=(path,), kwargs=kwargs)
+
+
+def make_request(target, args=None, kwargs=None, site=None):
+	t = ThreadWithReturnValue(target=target, args=args, kwargs=kwargs, site=site)
+	t.start()
+	t.join()
+	return t._return
+
+
+class ThreadWithReturnValue(Thread):
+	def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, *, site=None):
+		Thread.__init__(self, group, target, name, args, kwargs)
+		self._return = None
+		self.site = site or _site
+
+	def run(self):
+		if self._target is not None:
+			with patch("frappe.app.get_site_name", return_value=self.site):
+				header_patch = patch("frappe.get_request_header", new=patch_request_header)
+				if authorization_token:
+					header_patch.start()
+				self._return = self._target(*self._args, **self._kwargs)
+				if authorization_token:
+					header_patch.stop()
+
+	def join(self, *args):
+		Thread.join(self, *args)
+		return self._return
+
+
+def patch_request_header(key, *args, **kwargs):
+	if key == "Authorization":
+		return f"token {authorization_token}"
+
+
+class TestWSGIApp(FrappeAPITestCase):
+	def test_request_hooks(self):
+		self.addCleanup(lambda: _test_REQ_HOOK.clear())
+		get_hooks = frappe.get_hooks
+
+		def patch_request_hooks(event: str, *args, **kwargs):
+			patched_hooks = {
+				"before_request": ["frappe.tests.test_api.before_request"],
+				"after_request": ["frappe.tests.test_api.after_request"],
+			}
+			if event not in patched_hooks:
+				return get_hooks(event, *args, **kwargs)
+			return patched_hooks[event]
+
+		with patch("frappe.get_hooks", patch_request_hooks):
+			self.assertIsNone(_test_REQ_HOOK.get("before_request"))
+			self.assertIsNone(_test_REQ_HOOK.get("after_request"))
+			res = self.get("/api/method/ping")
+			self.assertLess(_test_REQ_HOOK.get("before_request"), _test_REQ_HOOK.get("after_request"))
+
+
+_test_REQ_HOOK = {}
+
+
+def before_request(*args, **kwargs):
+	_test_REQ_HOOK["before_request"] = time()
+
+
+def after_request(*args, **kwargs):
+	_test_REQ_HOOK["after_request"] = time()

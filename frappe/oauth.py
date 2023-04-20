@@ -3,7 +3,7 @@ import datetime
 import hashlib
 import re
 from http import cookies
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote, urljoin, urlparse
 
 import jwt
 import pytz
@@ -323,10 +323,7 @@ class OAuthWebRequestValidator(RequestValidator):
 		# Check whether frappe server URL is set
 		id_token_header = {"typ": "jwt", "alg": "HS256"}
 
-		user = frappe.get_doc(
-			"User",
-			frappe.session.user,
-		)
+		user = frappe.get_doc("User", request.user)
 
 		if request.nonce:
 			id_token["nonce"] = request.nonce
@@ -576,7 +573,7 @@ def get_userinfo(user):
 		if frappe.utils.validate_url(user.user_image, valid_schemes=valid_url_schemes):
 			picture = user.user_image
 		else:
-			picture = frappe_server_url + "/" + user.user_image
+			picture = urljoin(frappe_server_url, user.user_image)
 
 	userinfo = frappe._dict(
 		{

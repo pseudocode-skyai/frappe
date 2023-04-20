@@ -2,11 +2,11 @@ frappe.socketio = {
 	open_tasks: {},
 	open_docs: [],
 	emit_queue: [],
-	init: function(port = 3000) {
+
+	init: function (port = 3000) {
 		if (!window.io) {
 			return;
 		}
-
 		if (frappe.boot.disable_async) {
 			return;
 		}
@@ -44,11 +44,7 @@ frappe.socketio = {
 				data.percent = flt(data.progress[0]) / data.progress[1] * 100;
 			}
 			if(data.percent) {
-				if(data.percent==100) {
-					frappe.hide_progress();
-				} else {
-					frappe.show_progress(data.title || __("Progress"), data.percent, 100, data.description);
-				}
+				frappe.show_progress(data.title || __("Progress"), data.percent, 100, data.description, true);
 			}
 		});
 
@@ -133,7 +129,10 @@ frappe.socketio = {
 	task_unsubscribe: function(task_id) {
 		frappe.socketio.socket.emit('task_unsubscribe', task_id);
 	},
-	doc_subscribe: function(doctype, docname) {
+	doctype_subscribe: function (doctype) {
+		frappe.socketio.socket.emit("doctype_subscribe", doctype);
+	},
+	doc_subscribe: function (doctype, docname) {
 		if (frappe.flags.doc_subscribe) {
 			console.log('throttled');
 			return;
@@ -147,10 +146,10 @@ frappe.socketio = {
 		frappe.socketio.socket.emit('doc_subscribe', doctype, docname);
 		frappe.socketio.open_docs.push({doctype: doctype, docname: docname});
 	},
-	doc_unsubscribe: function(doctype, docname) {
-		frappe.socketio.socket.emit('doc_unsubscribe', doctype, docname);
-		frappe.socketio.open_docs = $.filter(frappe.socketio.open_docs, function(d) {
-			if(d.doctype===doctype && d.name===docname) {
+	doc_unsubscribe: function (doctype, docname) {
+		frappe.socketio.socket.emit("doc_unsubscribe", doctype, docname);
+		frappe.socketio.open_docs = $.filter(frappe.socketio.open_docs, function (d) {
+			if (d.doctype === doctype && d.name === docname) {
 				return null;
 			} else {
 				return d;
@@ -209,7 +208,7 @@ frappe.socketio = {
 					}
 				});
 
-				if (cur_frm && cur_frm.doc) {
+				if (cur_frm && cur_frm.doc && !cur_frm.is_new()) {
 					frappe.socketio.doc_open(cur_frm.doc.doctype, cur_frm.doc.name);
 				}
 			}, 5000);

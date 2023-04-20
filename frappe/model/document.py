@@ -179,6 +179,7 @@ class Document(BaseDocument):
 				{"parent": self.name, "parenttype": self.doctype, "parentfield": df.fieldname},
 				"*",
 				as_dict=True,
+				for_update=self.flags.for_update,
 				order_by="idx asc",
 			)
 			if children:
@@ -191,9 +192,10 @@ class Document(BaseDocument):
 			self.__setup__()
 
 	def get_latest(self):
-		if not getattr(self, "latest", None):
-			self.latest = frappe.get_doc(self.doctype, self.name)
-		return self.latest
+		if not getattr(self, "_doc_before_save", None):
+			self.load_doc_before_save()
+
+		return self._doc_before_save
 
 	def check_permission(self, permtype="read", permlevel=None):
 		"""Raise `frappe.PermissionError` if not permitted"""
@@ -1093,7 +1095,9 @@ class Document(BaseDocument):
 			self.run_method("on_update_after_submit")
 
 		self.clear_cache()
-		self.notify_update()
+
+		if self.flags.get("notify_update", True):
+			self.notify_update()
 
 		update_global_search(self)
 
@@ -1103,8 +1107,6 @@ class Document(BaseDocument):
 
 		if (self.doctype, self.name) in frappe.flags.currently_saving:
 			frappe.flags.currently_saving.remove((self.doctype, self.name))
-
-		self.latest = None
 
 	def clear_cache(self):
 		frappe.clear_document_cache(self.doctype, self.name)
@@ -1146,7 +1148,7 @@ class Document(BaseDocument):
 		:param fieldname: fieldname of the property to be updated, or a {"field":"value"} dictionary
 		:param value: value of the property to be updated
 		:param update_modified: default True. updates the `modified` and `modified_by` properties
-		:param notify: default False. run doc.notify_updated() to send updates via socketio
+		:param notify: default False. run doc.notify_update() to send updates via socketio
 		:param commit: default False. run frappe.db.commit()
 		"""
 		if isinstance(fieldname, dict):
@@ -1166,6 +1168,9 @@ class Document(BaseDocument):
 
 		# to trigger notification on value change
 		self.run_method("before_change")
+
+		if self.name is None:
+			return
 
 		frappe.db.set_value(
 			self.doctype,

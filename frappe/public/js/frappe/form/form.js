@@ -168,7 +168,7 @@ frappe.ui.form.Form = class FrappeForm {
 			},
 			{
 				'shortcut': 'shift+alt+down',
-				'description': __('To duplcate current row')
+				'description': __('Duplicate current row')
 			}
 		];
 
@@ -245,9 +245,11 @@ frappe.ui.form.Form = class FrappeForm {
 
 		// using $.each to preserve df via closure
 		$.each(table_fields, function(i, df) {
-			frappe.model.on(df.options, "*", function(fieldname, value, doc) {
+			frappe.model.on(df.options, "*", function(fieldname, value, doc, skip_dirty_trigger=false) {
 				if(doc.parent===me.docname && doc.parentfield===df.fieldname) {
-					me.dirty();
+					if (!skip_dirty_trigger) {
+						me.dirty();
+					}
 					me.fields_dict[df.fieldname].grid.set_value(fieldname, value, doc);
 					return me.script_manager.trigger(fieldname, doc.doctype, doc.name);
 				}
@@ -316,9 +318,19 @@ frappe.ui.form.Form = class FrappeForm {
 				return;
 			}
 
+			// if grids exist => document changed
+			// Update perm and refresh grids
+			this.grids.forEach((table) => {
+				table.grid.perm = this.perm;
+				table.grid.refresh();
+			});
+
 			// read only (workflow)
 			this.read_only = frappe.workflow.is_read_only(this.doctype, this.docname);
-			if (this.read_only) this.set_read_only(true);
+			if (this.read_only) {
+				this.set_read_only(true);
+				frappe.show_alert(__("This form is not editable due to a Workflow."));
+			}
 
 			// check if doctype is already open
 			if (!this.opendocs[this.docname]) {
@@ -917,10 +929,12 @@ frappe.ui.form.Form = class FrappeForm {
 		this.toolbar.set_primary_action();
 	}
 
-	disable_save() {
+	disable_save(set_dirty=false) {
 		// IMPORTANT: this function should be called in refresh event
 		this.save_disabled = true;
 		this.toolbar.current_status = null;
+		// field changes should make form dirty
+		this.set_dirty = set_dirty;
 		this.page.clear_primary_action();
 	}
 
@@ -1409,7 +1423,7 @@ frappe.ui.form.Form = class FrappeForm {
 		return doc;
 	}
 
-	set_value(field, value, if_missing) {
+	set_value(field, value, if_missing, skip_dirty_trigger=false) {
 		var me = this;
 		var _set = function(f, v) {
 			var fieldobj = me.fields_dict[f];
@@ -1429,7 +1443,7 @@ frappe.ui.form.Form = class FrappeForm {
 						me.refresh_field(f);
 						return Promise.resolve();
 					} else {
-						return frappe.model.set_value(me.doctype, me.doc.name, f, v);
+						return frappe.model.set_value(me.doctype, me.doc.name, f, v, me.fieldtype, skip_dirty_trigger);
 					}
 				}
 			} else {
@@ -1753,19 +1767,28 @@ frappe.ui.form.Form = class FrappeForm {
 	setup_docinfo_change_listener() {
 		let doctype = this.doctype;
 		let docname = this.docname;
-		let listener_name = `update_docinfo_for_${doctype}_${docname}`;
-		// to avoid duplicates
-		frappe.realtime.off(listener_name);
-		frappe.realtime.on(listener_name, ({doc, key, action='update'}) => {
-			let doc_list = (frappe.model.docinfo[doctype][docname][key] || []);
-			if (action === 'add') {
-				frappe.model.docinfo[doctype][docname][key].push(doc);
-			}
 
-			let docindex = doc_list.findIndex(old_doc => {
+		if (this.doc && !this.is_new()) {
+			frappe.socketio.doc_subscribe(doctype, docname);
+		}
+		frappe.realtime.off("docinfo_update");
+		frappe.realtime.on("docinfo_update", ({ doc, key, action = "update" }) => {
+			if (
+				!doc.reference_doctype ||
+				!doc.reference_name ||
+				doc.reference_doctype !== doctype ||
+				doc.reference_name !== docname
+			) {
+				return;
+			}
+			let doc_list = frappe.model.docinfo[doctype][docname][key] || [];
+			let docindex = doc_list.findIndex((old_doc) => {
 				return old_doc.name === doc.name;
 			});
 
+			if (action === "add") {
+				frappe.model.docinfo[doctype][docname][key].push(doc);
+			}
 			if (docindex > -1) {
 				if (action === 'update') {
 					frappe.model.docinfo[doctype][docname][key].splice(docindex, 1, doc);

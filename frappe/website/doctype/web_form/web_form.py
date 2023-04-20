@@ -36,17 +36,20 @@ class WebForm(WebsiteGenerator):
 		if not self.module:
 			self.module = frappe.db.get_value("DocType", self.doc_type, "module")
 
-		if (
-			not (
-				frappe.flags.in_install
-				or frappe.flags.in_patch
-				or frappe.flags.in_test
-				or frappe.flags.in_fixtures
-			)
-			and self.is_standard
-			and not frappe.conf.developer_mode
-		):
-			frappe.throw(_("You need to be in developer mode to edit a Standard Web Form"))
+		in_user_env = not (
+			frappe.flags.in_install
+			or frappe.flags.in_patch
+			or frappe.flags.in_test
+			or frappe.flags.in_fixtures
+		)
+		if in_user_env and self.is_standard and not frappe.conf.developer_mode:
+			# only published can be changed for standard web forms
+			if self.has_value_changed("published"):
+				published_value = self.published
+				self.reload()
+				self.published = published_value
+			else:
+				frappe.throw(_("You need to be in developer mode to edit a Standard Web Form"))
 
 		if not frappe.flags.in_import:
 			self.validate_fields()
@@ -138,7 +141,6 @@ def get_context(context):
 
 	def get_context(self, context):
 		"""Build context to render the `web_form.html` template"""
-		self.set_web_form_module()
 
 		doc, delimeter = make_route_string(frappe.form_dict)
 		context.doc = doc
@@ -273,13 +275,14 @@ def get_context(context):
 
 	def add_custom_context_and_script(self, context):
 		"""Update context from module if standard and append script"""
-		if self.web_form_module:
-			new_context = self.web_form_module.get_context(context)
+		if self.is_standard:
+			web_form_module = get_web_form_module(self)
+			new_context = web_form_module.get_context(context)
 
 			if new_context:
 				context.update(new_context)
 
-			js_path = os.path.join(os.path.dirname(self.web_form_module.__file__), scrub(self.name) + ".js")
+			js_path = os.path.join(os.path.dirname(web_form_module.__file__), scrub(self.name) + ".js")
 			if os.path.exists(js_path):
 				script = frappe.render_template(open(js_path, "r").read(), context)
 
@@ -289,9 +292,7 @@ def get_context(context):
 
 				context.script = script
 
-			css_path = os.path.join(
-				os.path.dirname(self.web_form_module.__file__), scrub(self.name) + ".css"
-			)
+			css_path = os.path.join(os.path.dirname(web_form_module.__file__), scrub(self.name) + ".css")
 			if os.path.exists(css_path):
 				style = open(css_path, "r").read()
 
@@ -367,14 +368,6 @@ def get_context(context):
 
 		return parents
 
-	def set_web_form_module(self):
-		"""Get custom web form module if exists"""
-		self.web_form_module = self.get_web_form_module()
-
-	def get_web_form_module(self):
-		if self.is_standard:
-			return get_doc_module(self.module, self.doctype, self.name)
-
 	def validate_mandatory(self, doc):
 		"""Validate mandatory web form fields"""
 		missing = []
@@ -397,7 +390,7 @@ def get_context(context):
 			return False
 
 		if self.apply_document_permissions:
-			return frappe.get_doc(doctype, name).has_permission()
+			return frappe.get_doc(doctype, name).has_permission(permtype=ptype)
 
 		# owner matches
 		elif frappe.db.get_value(doctype, name, "owner") == frappe.session.user:
@@ -413,9 +406,14 @@ def get_context(context):
 			return False
 
 
+def get_web_form_module(doc):
+	if doc.is_standard:
+		return get_doc_module(doc.module, doc.doctype, doc.name)
+
+
 @frappe.whitelist(allow_guest=True)
 @rate_limit(key="web_form", limit=5, seconds=60, methods=["POST"])
-def accept(web_form, data, docname=None, for_payment=False):
+def accept(web_form, data, for_payment=False):
 	"""Save the web form"""
 	data = frappe._dict(json.loads(data))
 	for_payment = frappe.parse_json(for_payment)
@@ -424,19 +422,20 @@ def accept(web_form, data, docname=None, for_payment=False):
 	files_to_delete = []
 
 	web_form = frappe.get_doc("Web Form", web_form)
+	doctype = web_form.doc_type
 
 	if data.name and not web_form.allow_edit:
 		frappe.throw(_("You are not allowed to update this Web Form Document"))
 
 	frappe.flags.in_web_form = True
-	meta = frappe.get_meta(data.doctype)
+	meta = frappe.get_meta(doctype)
 
-	if docname:
+	if data.name:
 		# update
-		doc = frappe.get_doc(data.doctype, docname)
+		doc = frappe.get_doc(doctype, data.name)
 	else:
 		# insert
-		doc = frappe.new_doc(data.doctype)
+		doc = frappe.new_doc(doctype)
 
 	# set values
 	for field in web_form.web_form_fields:
@@ -461,7 +460,7 @@ def accept(web_form, data, docname=None, for_payment=False):
 		doc.run_method("validate_payment")
 
 	if doc.name:
-		if web_form.has_web_form_permission(doc.doctype, doc.name, "write"):
+		if web_form.has_web_form_permission(doctype, doc.name, "write"):
 			doc.save(ignore_permissions=True)
 		else:
 			# only if permissions are present
@@ -483,7 +482,7 @@ def accept(web_form, data, docname=None, for_payment=False):
 
 			# remove earlier attached file (if exists)
 			if doc.get(fieldname):
-				remove_file_by_url(doc.get(fieldname), doctype=doc.doctype, name=doc.name)
+				remove_file_by_url(doc.get(fieldname), doctype=doctype, name=doc.name)
 
 			# save new file
 			filename, dataurl = filedata.split(",", 1)
@@ -491,7 +490,7 @@ def accept(web_form, data, docname=None, for_payment=False):
 				{
 					"doctype": "File",
 					"file_name": filename,
-					"attached_to_doctype": doc.doctype,
+					"attached_to_doctype": doctype,
 					"attached_to_name": doc.name,
 					"content": dataurl,
 					"decode": True,
@@ -507,7 +506,7 @@ def accept(web_form, data, docname=None, for_payment=False):
 	if files_to_delete:
 		for f in files_to_delete:
 			if f:
-				remove_file_by_url(f, doctype=doc.doctype, name=doc.name)
+				remove_file_by_url(f, doctype=doctype, name=doc.name)
 
 	frappe.flags.web_form_doc = doc
 

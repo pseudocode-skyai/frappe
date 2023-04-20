@@ -9,7 +9,7 @@ import frappe
 import frappe.defaults
 import frappe.permissions
 import frappe.share
-from frappe import _, msgprint, throw
+from frappe import STANDARD_USERS, _, msgprint, throw
 from frappe.core.doctype.user_type.user_type import user_linked_with_permission_on_doctype
 from frappe.desk.doctype.notification_settings.notification_settings import (
 	create_notification_settings,
@@ -32,8 +32,6 @@ from frappe.utils.password import check_password, get_password_reset_limit
 from frappe.utils.password import update_password as _update_password
 from frappe.utils.user import get_system_managers
 from frappe.website.utils import is_signup_disabled
-
-STANDARD_USERS = ("Guest", "Administrator")
 
 
 class User(Document):
@@ -125,18 +123,19 @@ class User(Document):
 		frappe.enqueue(
 			"frappe.core.doctype.user.user.create_contact", user=self, ignore_mandatory=True, now=now
 		)
-		if self.name not in ("Administrator", "Guest") and not self.user_image:
+
+		if self.name not in STANDARD_USERS and not self.user_image:
 			frappe.enqueue("frappe.core.doctype.user.user.update_gravatar", name=self.name, now=now)
 
 		# Set user selected timezone
 		if self.time_zone:
 			frappe.defaults.set_default("time_zone", self.time_zone, self.name)
 
-		if self.has_value_changed("allow_in_mentions") or self.has_value_changed("user_type"):
-			frappe.cache().delete_key("users_for_mentions")
-
 		if self.has_value_changed("enabled"):
+			frappe.cache().delete_key("users_for_mentions")
 			frappe.cache().delete_key("enabled_users")
+		elif self.has_value_changed("allow_in_mentions") or self.has_value_changed("user_type"):
+			frappe.cache().delete_key("users_for_mentions")
 
 	def has_website_permission(self, ptype, user, verbose=False):
 		"""Returns true if current user is the session user"""
@@ -236,6 +235,9 @@ class User(Document):
 		)
 
 	def share_with_self(self):
+		if self.name in STANDARD_USERS:
+			return
+
 		frappe.share.add(
 			self.doctype, self.name, self.name, write=1, share=1, flags={"ignore_share_permission": True}
 		)
@@ -581,7 +583,7 @@ class User(Document):
 			for p in self.social_logins:
 				if p.provider == provider:
 					return p.userid
-		except:
+		except Exception:
 			return None
 
 	def set_social_login_userid(self, provider, userid, username=None):
@@ -893,7 +895,7 @@ def reset_password(user):
 			title=_("Password Email Sent"),
 		)
 	except frappe.DoesNotExistError:
-		frappe.local.response["http_status_code"] = 400
+		frappe.local.response["http_status_code"] = 404
 		frappe.clear_messages()
 		return "not found"
 
@@ -903,6 +905,7 @@ def reset_password(user):
 def user_query(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import get_filters_cond, get_match_cond
 
+	doctype = "User"
 	conditions = []
 
 	user_type_condition = "and user_type != 'Website User'"

@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 
 import datetime
 import re
+from contextlib import suppress
 from time import time
 from typing import Dict, List, Union
 
@@ -21,7 +22,7 @@ from frappe import _
 from frappe.database.query import Query
 from frappe.model.utils.link_count import flush_local_link_count
 from frappe.query_builder.utils import DocType
-from frappe.utils import cast, get_datetime, get_table_name, getdate, now, sbool
+from frappe.utils import cast, cint, get_datetime, get_table_name, getdate, now, sbool
 
 
 class Database(object):
@@ -84,6 +85,18 @@ class Database(object):
 		self._conn = self.get_connection()
 		self._cursor = self._conn.cursor()
 		frappe.local.rollback_observers = []
+
+		try:
+			execution_timeout = get_query_execution_timeout()
+			if execution_timeout:
+				self.set_execution_timeout(execution_timeout)
+		except Exception as e:
+			frappe.logger("database").warning(f"Couldn't set execution timeout {e}")
+
+	def set_execution_timeout(self, seconds: int):
+		"""Set session speicifc timeout on exeuction of statements.
+		If any statement takes more time it will be killed along with entire transaction."""
+		raise NotImplementedError
 
 	def use(self, db_name):
 		"""`USE` db_name."""
@@ -252,7 +265,7 @@ class Database(object):
 		else:
 			try:
 				return self._cursor.mogrify(query, values)
-			except:  # noqa: E722
+			except Exception:
 				return (query, values)
 
 	def explain_query(self, query, values=None):
@@ -944,6 +957,9 @@ class Database(object):
 					obj.on_rollback()
 			frappe.local.rollback_observers = []
 
+			frappe.local.realtime_log = []
+			frappe.flags.enqueue_after_commit = []
+
 	def field_exists(self, dt, fn):
 		"""Return true of field exists."""
 		return self.exists("DocField", {"fieldname": fn, "parent": dt})
@@ -1034,13 +1050,7 @@ class Database(object):
 		if not datetime:
 			return "0001-01-01 00:00:00.000000"
 
-		if isinstance(datetime, frappe.string_types):
-			if ":" not in datetime:
-				datetime = datetime + " 00:00:00.000000"
-		else:
-			datetime = datetime.strftime("%Y-%m-%d %H:%M:%S.%f")
-
-		return datetime
+		return get_datetime(datetime).strftime("%Y-%m-%d %H:%M:%S.%f")
 
 	def get_creation_count(self, doctype, minutes):
 		"""Get count of records created in the last x minutes"""
@@ -1255,10 +1265,44 @@ class Database(object):
 
 
 def enqueue_jobs_after_commit():
-	from frappe.utils.background_jobs import execute_job, get_queue
+	from frappe.utils.background_jobs import (
+		RQ_JOB_FAILURE_TTL,
+		RQ_RESULTS_TTL,
+		execute_job,
+		get_queue,
+	)
 
 	if frappe.flags.enqueue_after_commit and len(frappe.flags.enqueue_after_commit) > 0:
 		for job in frappe.flags.enqueue_after_commit:
 			q = get_queue(job.get("queue"), is_async=job.get("is_async"))
-			q.enqueue_call(execute_job, timeout=job.get("timeout"), kwargs=job.get("queue_args"))
+			q.enqueue_call(
+				execute_job,
+				timeout=job.get("timeout"),
+				kwargs=job.get("queue_args"),
+				failure_ttl=RQ_JOB_FAILURE_TTL,
+				result_ttl=RQ_RESULTS_TTL,
+			)
 		frappe.flags.enqueue_after_commit = []
+
+
+def get_query_execution_timeout() -> int:
+	"""Get execution timeout based on current timeout in different contexts.
+	    HTTP requests: HTTP timeout or a default (300)
+	    Background jobs: Job timeout
+	Console/Commands: No timeout = 0.
+	    Note: Timeout adds 1.5x as "safety factor"
+	"""
+	from rq import get_current_job
+
+	if not frappe.conf.get("enable_db_statement_timeout"):
+		return 0
+
+	# Zero means no timeout, which is the default value in db.
+	timeout = 0
+	with suppress(Exception):
+		if getattr(frappe.local, "request", None):
+			timeout = frappe.conf.http_timeout or 300
+		elif get_current_job():
+			timeout = get_current_job().timeout
+
+	return int(cint(timeout) * 1.5)

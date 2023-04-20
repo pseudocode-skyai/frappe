@@ -94,7 +94,7 @@ def validate_args(data):
 def validate_fields(data):
 	wildcard = update_wildcard_field_param(data)
 
-	for field in data.fields or []:
+	for field in list(data.fields or []):
 		fieldname = extract_fieldname(field)
 		if is_standard(fieldname):
 			continue
@@ -226,7 +226,7 @@ def parse_json(data):
 	if isinstance(data.get("or_filters"), string_types):
 		data["or_filters"] = json.loads(data["or_filters"])
 	if isinstance(data.get("fields"), string_types):
-		data["fields"] = json.loads(data["fields"])
+		data["fields"] = ["*"] if data["fields"] == "*" else json.loads(data["fields"])
 	if isinstance(data.get("docstatus"), string_types):
 		data["docstatus"] = json.loads(data["docstatus"])
 	if isinstance(data.get("save_user_settings"), string_types):
@@ -280,7 +280,7 @@ def save_report(name, doctype, report_settings):
 		if report.report_type != "Report Builder":
 			frappe.throw(_("Only reports of type Report Builder can be edited"))
 
-		if report.owner != frappe.session.user and not frappe.has_permission("Report", "write"):
+		if report.owner != frappe.session.user and not report.has_permission("write"):
 			frappe.throw(_("Insufficient Permissions for editing Report"), frappe.PermissionError)
 	else:
 		report = frappe.new_doc("Report")
@@ -309,7 +309,7 @@ def delete_report(name):
 	if report.report_type != "Report Builder":
 		frappe.throw(_("Only reports of type Report Builder can be deleted"))
 
-	if report.owner != frappe.session.user and not frappe.has_permission("Report", "delete"):
+	if report.owner != frappe.session.user and not report.has_permission("delete"):
 		frappe.throw(_("Insufficient Permissions for deleting Report"), frappe.PermissionError)
 
 	report.delete(ignore_permissions=True)
@@ -683,7 +683,7 @@ def get_filters_cond(
 			for f in filters:
 				if isinstance(f[1], string_types) and f[1][0] == "!":
 					flt.append([doctype, f[0], "!=", f[1][1:]])
-				elif isinstance(f[1], (list, tuple)) and f[1][0] in (
+				elif isinstance(f[1], (list, tuple)) and f[1][0].lower() in (
 					">",
 					"<",
 					">=",

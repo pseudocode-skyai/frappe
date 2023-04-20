@@ -29,6 +29,7 @@ from six.moves.urllib.parse import quote, unquote
 
 import frappe
 from frappe import _, conf, safe_decode
+from frappe.database.schema import SPECIAL_CHAR_PATTERN
 from frappe.model.document import Document
 from frappe.utils import (
 	call_hook_method,
@@ -37,6 +38,7 @@ from frappe.utils import (
 	encode,
 	get_files_path,
 	get_hook_method,
+	get_url,
 	random_string,
 	strip,
 )
@@ -57,10 +59,17 @@ class FolderNotEmpty(frappe.ValidationError):
 
 exclude_from_linked_with = True
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+URL_PREFIXES = ("http://", "https://")
 
 
 class File(Document):
 	no_feed_on_delete = True
+
+	@property
+	def is_remote_file(self):
+		if self.file_url:
+			return self.file_url.startswith(URL_PREFIXES)
+		return not self.content
 
 	def before_insert(self):
 		frappe.local.rollback_observers.append(self)
@@ -69,6 +78,13 @@ class File(Document):
 			self.file_name = re.sub(r"/", "", self.file_name)
 		self.content = self.get("content", None)
 		self.decode = self.get("decode", False)
+
+		if self.is_folder:
+			return
+
+		if self.is_remote_file:
+			self.validate_remote_file()
+
 		if self.content:
 			self.save_file(content=self.content, decode=self.decode)
 
@@ -121,9 +137,20 @@ class File(Document):
 		if self.is_folder:
 			self.file_url = ""
 		else:
+			self.validate_attachment_references()
 			self.validate_url()
 
 		self.file_size = frappe.form_dict.file_size or self.file_size
+
+	def validate_attachment_references(self):
+		if not self.attached_to_doctype:
+			return
+
+		if not self.attached_to_name or not isinstance(self.attached_to_name, (str, int)):
+			frappe.throw(_("Attached To Name must be a string or an integer"), frappe.ValidationError)
+
+		if self.attached_to_field and SPECIAL_CHAR_PATTERN.search(self.attached_to_field):
+			frappe.throw(_("The fieldname you've specified in Attached To Field is invalid"))
 
 	def validate_url(self):
 		if not self.file_url or self.file_url.startswith(("http://", "https://")):
@@ -213,6 +240,12 @@ class File(Document):
 					exc=frappe.exceptions.AttachmentLimitReached,
 					title=_("Attachment Limit Reached"),
 				)
+
+	def validate_remote_file(self):
+		"""Validates if file uploaded using URL already exist"""
+		site_url = get_url()
+		if "/files/" in self.file_url and self.file_url.startswith(site_url):
+			self.file_url = self.file_url.split(site_url, 1)[1]
 
 	def set_folder_name(self):
 		"""Make parent folders if not exists based on reference doctype and name"""
@@ -375,8 +408,7 @@ class File(Document):
 		exists = os.path.exists(self.get_full_path())
 		return exists
 
-	def get_content(self):
-		"""Returns [`file_name`, `content`] for given file name `fname`"""
+	def get_content(self) -> bytes:
 		if self.is_folder:
 			frappe.throw(_("Cannot get file contents of a Folder"))
 
@@ -406,6 +438,10 @@ class File(Document):
 		"""Returns file path from given file name"""
 
 		file_path = self.file_url or self.file_name
+
+		site_url = get_url()
+		if "/files/" in file_path and file_path.startswith(site_url):
+			file_path = file_path.split(site_url, 1)[1]
 
 		if "/" not in file_path:
 			file_path = "/files/" + file_path
@@ -999,6 +1035,6 @@ def attach_files_to_document(doc, event):
 				attached_to_doctype=doc.doctype,
 				attached_to_field=df.fieldname,
 				folder="Home/Attachments",
-			).insert()
+			).insert(ignore_permissions=True)
 		except Exception:
 			frappe.log_error(title=_("Error Attaching File"))

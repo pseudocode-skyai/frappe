@@ -8,14 +8,14 @@ import frappe
 from frappe import _
 from frappe.email.queue import send_one
 from frappe.model.document import Document
-from frappe.utils import now_datetime
+from frappe.utils import sbool
 
 
 class EmailQueue(Document):
 	def set_recipients(self, recipients):
 		self.set("recipients", [])
 		for r in recipients:
-			self.append("recipients", {"recipient": r, "status": "Not Sent"})
+			self.append("recipients", {"recipient": r.strip(), "status": "Not Sent"})
 
 	def on_trash(self):
 		self.prevent_email_queue_delete()
@@ -35,6 +35,8 @@ class EmailQueue(Document):
 @frappe.whitelist()
 def retry_sending(name):
 	doc = frappe.get_doc("Email Queue", name)
+	doc.check_permission()
+
 	if doc and (doc.status == "Error" or doc.status == "Partially Errored"):
 		doc.status = "Not Sent"
 		for d in doc.recipients:
@@ -45,7 +47,14 @@ def retry_sending(name):
 
 @frappe.whitelist()
 def send_now(name):
+	frappe.has_permission("Email Queue", doc=name, throw=True)
 	send_one(name, now=True)
+
+
+@frappe.whitelist()
+def toggle_sending(enable):
+	frappe.only_for("System Manager")
+	frappe.db.set_default("suspend_email_queue", 0 if sbool(enable) else 1)
 
 
 def on_doctype_update():

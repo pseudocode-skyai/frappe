@@ -6,7 +6,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     strategy:
       fail-fast: false
@@ -115,6 +115,12 @@ jobs:
         env:
           DB: mariadb
           TYPE: ui
+
+      - name: Verify yarn.lock
+        if: ${{ steps.check-build.outputs.build == 'strawberry' }}
+        run: |
+          cd ~/frappe-bench/apps/frappe
+          git diff --exit-code yarn.lock
 
       - name: Site Setup
         if: ${{ steps.check-build.outputs.build == 'strawberry' }}

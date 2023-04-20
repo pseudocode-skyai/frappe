@@ -16,12 +16,14 @@ from frappe.core.doctype.navbar_settings.navbar_settings import get_app_logo, ge
 from frappe.desk.form.load import get_meta_bundle
 from frappe.email.inbox import get_email_accounts
 from frappe.model.base_document import get_controller
+from frappe.permissions import has_permission
 from frappe.social.doctype.energy_point_log.energy_point_log import get_energy_points
 from frappe.social.doctype.energy_point_settings.energy_point_settings import (
 	is_energy_point_enabled,
 )
 from frappe.social.doctype.post.post import frequently_visited_links
-from frappe.translate import get_lang_dict
+from frappe.translate import get_lang_dict, get_messages_for_boot, get_translated_doctypes
+from frappe.utils import cstr
 from frappe.utils.change_log import get_versions
 from frappe.website.doctype.web_page_view.web_page_view import is_tracking_enabled
 
@@ -97,6 +99,7 @@ def get_bootinfo():
 	bootinfo.additional_filters_config = get_additional_filters_from_hooks()
 	bootinfo.desk_settings = get_desk_settings()
 	bootinfo.app_logo_url = get_app_logo()
+	bootinfo.translated_doctypes = get_translated_doctypes()
 
 	return bootinfo
 
@@ -134,6 +137,10 @@ def get_allowed_pages(cache=False):
 
 def get_allowed_reports(cache=False):
 	return get_user_pages_or_reports("Report", cache=cache)
+
+
+def get_allowed_report_names(cache=False):
+	return {cstr(report) for report in get_allowed_reports(cache).keys() if report}
 
 
 def get_user_pages_or_reports(parent, cache=False):
@@ -224,7 +231,10 @@ def get_user_pages_or_reports(parent, cache=False):
 				has_role[p.name] = {"modified": p.modified, "title": p.title}
 
 	elif parent == "Report":
-		reports = frappe.get_all(
+		if not has_permission("Report", raise_exception=False):
+			return {}
+
+		reports = frappe.get_list(
 			"Report",
 			fields=["name", "report_type"],
 			filters={"name": ("in", has_role.keys())},
@@ -232,6 +242,10 @@ def get_user_pages_or_reports(parent, cache=False):
 		)
 		for report in reports:
 			has_role[report.name]["report_type"] = report.report_type
+
+		non_permitted_reports = set(has_role.keys()) - {r.name for r in reports}
+		for r in non_permitted_reports:
+			has_role.pop(r, None)
 
 	# Expire every six hours
 	_cache.set_value("has_role:" + parent, has_role, frappe.session.user, 21600)
@@ -247,18 +261,8 @@ def get_column(doctype):
 
 
 def load_translations(bootinfo):
-	messages = frappe.get_lang_dict("boot")
-
 	bootinfo["lang"] = frappe.lang
-
-	# load translated report names
-	for name in bootinfo.user.all_reports:
-		messages[name] = frappe._(name)
-
-	# only untranslated
-	messages = {k: v for k, v in iteritems(messages) if k != v}
-
-	bootinfo["__messages"] = messages
+	bootinfo["__messages"] = get_messages_for_boot()
 
 
 def get_user_info():

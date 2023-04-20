@@ -128,7 +128,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval:doc.is_standard == 'Yes'",
    "fieldname": "roles",
    "fieldtype": "Table",
    "label": "Roles",
@@ -158,11 +157,13 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "filters",
+   "depends_on": "eval:doc.report_type != \"Custom Report\"",
    "fieldname": "filters_section",
    "fieldtype": "Section Break",
    "label": "Filters"
   },
   {
+   "depends_on": "eval:doc.report_type != \"Custom Report\"",
    "fieldname": "filters",
    "fieldtype": "Table",
    "label": "Filters",
@@ -171,11 +172,13 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "columns",
+   "depends_on": "eval:doc.report_type != \"Custom Report\"",
    "fieldname": "columns_section",
    "fieldtype": "Section Break",
    "label": "Columns"
   },
   {
+   "depends_on": "eval:doc.report_type != \"Custom Report\"",
    "fieldname": "columns",
    "fieldtype": "Table",
    "label": "Columns",
@@ -192,10 +195,11 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-08-17 16:49:28.474274",
+ "modified": "2023-04-07 18:18:11.782178",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "Report",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -242,5 +246,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

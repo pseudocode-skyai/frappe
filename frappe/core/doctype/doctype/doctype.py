@@ -22,7 +22,7 @@ from frappe.cache_manager import clear_controller_cache, clear_user_cache
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.database.schema import validate_column_length, validate_column_name
-from frappe.desk.notifications import delete_notification_count_for
+from frappe.desk.notifications import delete_notification_count_for, get_filters_for
 from frappe.desk.utils import validate_route_conflict
 from frappe.model import (
 	data_field_options,
@@ -37,7 +37,7 @@ from frappe.model.document import Document
 from frappe.model.meta import Meta
 from frappe.modules import get_doc_path, make_boilerplate
 from frappe.modules.import_file import get_file_path
-from frappe.utils import cint, now
+from frappe.utils import cint, now, random_string
 
 
 class InvalidFieldNameError(frappe.ValidationError):
@@ -332,7 +332,7 @@ class DocType(Document):
 						elif d.fieldtype == "Column Break":
 							d.fieldname = d.fieldname + "_column"
 					else:
-						d.fieldname = d.fieldtype.lower().replace(" ", "_") + "_" + str(d.idx)
+						d.fieldname = d.fieldtype.lower().replace(" ", "_") + "_" + str(random_string(5))
 				else:
 					if d.fieldname in restricted:
 						frappe.throw(_("Fieldname {0} is restricted").format(d.fieldname), InvalidFieldNameError)
@@ -590,14 +590,14 @@ class DocType(Document):
 					remaining_field_names = [f.fieldname for f in self.fields]
 
 					for fieldname in old_field_names:
-						field_dict = list(filter(lambda d: d["fieldname"] == fieldname, docdict["fields"]))
+						field_dict = [f for f in docdict["fields"] if f["fieldname"] == fieldname]
 						if field_dict:
 							new_field_dicts.append(field_dict[0])
 							if fieldname in remaining_field_names:
 								remaining_field_names.remove(fieldname)
 
 					for fieldname in remaining_field_names:
-						field_dict = list(filter(lambda d: d["fieldname"] == fieldname, docdict["fields"]))
+						field_dict = [f for f in docdict["fields"] if f["fieldname"] == fieldname]
 						new_field_dicts.append(field_dict[0])
 
 					docdict["fields"] = new_field_dicts
@@ -612,14 +612,14 @@ class DocType(Document):
 			remaining_field_names = [f["fieldname"] for f in docdict.get("fields", [])]
 
 			for fieldname in docdict.get("field_order"):
-				field_dict = list(filter(lambda d: d["fieldname"] == fieldname, docdict.get("fields", [])))
+				field_dict = [f for f in docdict.get("fields", []) if f["fieldname"] == fieldname]
 				if field_dict:
 					new_field_dicts.append(field_dict[0])
 					if fieldname in remaining_field_names:
 						remaining_field_names.remove(fieldname)
 
 			for fieldname in remaining_field_names:
-				field_dict = list(filter(lambda d: d["fieldname"] == fieldname, docdict.get("fields", [])))
+				field_dict = [f for f in docdict.get("fields", []) if f["fieldname"] == fieldname]
 				new_field_dicts.append(field_dict[0])
 
 			docdict["fields"] = new_field_dicts
@@ -848,16 +848,12 @@ def validate_series(dt, autoname=None, name=None):
 
 def validate_links_table_fieldnames(meta):
 	"""Validate fieldnames in Links table"""
-	if not meta.links or frappe.flags.in_patch or frappe.flags.in_fixtures:
+	if not meta.links or frappe.flags.in_patch or frappe.flags.in_fixtures or frappe.flags.in_migrate:
 		return
 
 	fieldnames = tuple(field.fieldname for field in meta.fields)
 	for index, link in enumerate(meta.links, 1):
-		if not frappe.get_meta(link.link_doctype).has_field(link.link_fieldname):
-			message = _("Document Links Row #{0}: Could not find field {1} in {2} DocType").format(
-				index, frappe.bold(link.link_fieldname), frappe.bold(link.link_doctype)
-			)
-			frappe.throw(message, InvalidFieldNameError, _("Invalid Fieldname"))
+		_test_connection_query(doctype=link.link_doctype, field=link.link_fieldname, idx=index)
 
 		if not link.is_child_table:
 			continue
@@ -884,6 +880,25 @@ def validate_links_table_fieldnames(meta):
 				index, frappe.bold(link.table_fieldname), frappe.bold(meta.name)
 			)
 			frappe.throw(message, frappe.ValidationError, _("Invalid Table Fieldname"))
+
+
+def _test_connection_query(doctype, field, idx):
+	"""Make sure that connection can be queried.
+
+	This function executes query similar to one that would be executed for
+	finding count on dashboard and hence validates if fieldname/doctype are
+	correct.
+	"""
+	filters = get_filters_for(doctype) or {}
+	filters[field] = ""
+
+	try:
+		frappe.get_all(doctype, filters=filters, limit=1, distinct=True, ignore_ifnull=True)
+	except Exception as e:
+		frappe.clear_last_message()
+		msg = _("Document Links Row #{0}: Invalid doctype or fieldname.").format(idx)
+		msg += "<br>" + str(e)
+		frappe.throw(msg, InvalidFieldNameError)
 
 
 def validate_fields_for_doctype(doctype):
@@ -916,12 +931,13 @@ def validate_fields(meta):
 		validate_column_name(fieldname)
 
 	def check_invalid_fieldnames(docname, fieldname):
-		invalid_fields = ("doctype",)
-		if fieldname in invalid_fields:
+		if fieldname in Document._reserved_keywords:
 			frappe.throw(
-				_("{0}: Fieldname cannot be one of {1}").format(
-					docname, ", ".join([frappe.bold(d) for d in invalid_fields])
-				)
+				_("{0}: fieldname cannot be set to reserved keyword {1}").format(
+					frappe.bold(docname),
+					frappe.bold(fieldname),
+				),
+				title=_("Invalid Fieldname"),
 			)
 
 	def check_unique_fieldname(docname, fieldname):
@@ -947,10 +963,7 @@ def validate_fields(meta):
 			)
 
 	def check_link_table_options(docname, d):
-		if frappe.flags.in_patch:
-			return
-
-		if frappe.flags.in_fixtures:
+		if frappe.flags.in_patch or frappe.flags.in_fixtures:
 			return
 
 		if d.fieldtype in ("Link",) + table_fields:
@@ -984,7 +997,7 @@ def validate_fields(meta):
 					d.options = options
 
 	def check_hidden_and_mandatory(docname, d):
-		if d.hidden and d.reqd and not d.default:
+		if d.hidden and d.reqd and not d.default and not frappe.flags.in_migrate:
 			frappe.throw(
 				_("{0}: Field {1} in row {2} cannot be hidden and mandatory without default").format(
 					docname, d.label, d.idx
@@ -1251,10 +1264,9 @@ def validate_fields(meta):
 				)
 				df_options_str = "<ul><li>" + "</li><li>".join([_(x) for x in data_field_options]) + "</ul>"
 
-				frappe.msgprint(text_str + df_options_str, title="Invalid Data Field", raise_exception=True)
+				frappe.msgprint(text_str + df_options_str, title="Invalid Data Field", alert=True)
 
 	def check_child_table_option(docfield):
-
 		if frappe.flags.in_fixtures:
 			return
 		if docfield.fieldtype not in ["Table MultiSelect", "Table"]:
@@ -1291,28 +1303,31 @@ def validate_fields(meta):
 		check_invalid_fieldnames(meta.get("name"), d.fieldname)
 		check_unique_fieldname(meta.get("name"), d.fieldname)
 		check_fieldname_length(d.fieldname)
-		check_illegal_mandatory(meta.get("name"), d)
-		check_link_table_options(meta.get("name"), d)
-		check_dynamic_link_options(d)
 		check_hidden_and_mandatory(meta.get("name"), d)
-		check_in_list_view(meta.get("istable"), d)
-		check_in_global_search(d)
-		check_illegal_default(d)
 		check_unique_and_text(meta.get("name"), d)
-		check_illegal_depends_on_conditions(d)
-		check_child_table_option(d)
 		check_table_multiselect_option(d)
 		scrub_options_in_select(d)
 		scrub_fetch_from(d)
 		validate_data_field_type(d)
 
-	check_fold(fields)
-	check_search_fields(meta, fields)
-	check_title_field(meta)
-	check_timeline_field(meta)
-	check_is_published_field(meta)
-	check_sort_field(meta)
-	check_image_field(meta)
+		if not frappe.flags.in_migrate:
+			check_link_table_options(meta.get("name"), d)
+			check_illegal_mandatory(meta.get("name"), d)
+			check_dynamic_link_options(d)
+			check_in_list_view(meta.get("istable"), d)
+			check_in_global_search(d)
+			check_illegal_depends_on_conditions(d)
+			check_illegal_default(d)
+			check_child_table_option(d)
+
+	if not frappe.flags.in_migrate:
+		check_fold(fields)
+		check_search_fields(meta, fields)
+		check_title_field(meta)
+		check_timeline_field(meta)
+		check_is_published_field(meta)
+		check_sort_field(meta)
+		check_image_field(meta)
 
 
 def validate_permissions_for_doctype(doctype, for_remove=False, alert=False):

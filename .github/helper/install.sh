@@ -21,11 +21,11 @@ if [ "$DB" == "mariadb" ];then
       mysql --host 127.0.0.1 --port 3306 -u root -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'";
 
       mysql --host 127.0.0.1 --port 3306 -u root -e "CREATE DATABASE test_frappe_consumer";
-      mysql --host 127.0.0.1 --port 3306 -u root -e "CREATE USER 'test_frappe_consumer'@'localhost' IDENTIFIED BY 'test_frappe_consumer'";
+      mysql --host 127.0.0.1 --port 3306 -u root -e "CREATE USER 'test_frappe_consumer'@'localhost' IDENTIFIED BY 'test_frappe'";
       mysql --host 127.0.0.1 --port 3306 -u root -e "GRANT ALL PRIVILEGES ON \`test_frappe_consumer\`.* TO 'test_frappe_consumer'@'localhost'";
 
       mysql --host 127.0.0.1 --port 3306 -u root -e "CREATE DATABASE test_frappe_producer";
-      mysql --host 127.0.0.1 --port 3306 -u root -e "CREATE USER 'test_frappe_producer'@'localhost' IDENTIFIED BY 'test_frappe_producer'";
+      mysql --host 127.0.0.1 --port 3306 -u root -e "CREATE USER 'test_frappe_producer'@'localhost' IDENTIFIED BY 'test_frappe'";
       mysql --host 127.0.0.1 --port 3306 -u root -e "GRANT ALL PRIVILEGES ON \`test_frappe_producer\`.* TO 'test_frappe_producer'@'localhost'";
 
       mysql --host 127.0.0.1 --port 3306 -u root -e "UPDATE mysql.user SET Password=PASSWORD('travis') WHERE User='root'";
@@ -50,12 +50,13 @@ if [ "$TYPE" == "server" ]; then sed -i 's/^redis_socketio:/# redis_socketio:/g'
 
 if [ "$TYPE" == "ui" ]; then bench setup requirements --node; fi
 
-# install node-sass which is required for website theme test
-cd ./apps/frappe || exit
-yarn add node-sass@4.13.1
-cd ../..
-
 bench start &
+
+CI=Yes bench build --app frappe &
+build_pid=$!
+
+
 bench --site test_site reinstall --yes
 if [ "$TYPE" == "server" ]; then bench --site test_site_producer reinstall --yes; fi
-CI=Yes bench build --app frappe
+
+wait $build_pid

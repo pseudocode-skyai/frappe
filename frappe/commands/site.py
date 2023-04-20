@@ -376,6 +376,32 @@ def add_system_manager(context, email, first_name, last_name, send_welcome_email
 		raise SiteNotSpecifiedError
 
 
+@click.command("add-user")
+@click.argument("email")
+@click.option("--first-name")
+@click.option("--last-name")
+@click.option("--password")
+@click.option("--user-type")
+@click.option("--add-role", multiple=True)
+@click.option("--send-welcome-email", default=False, is_flag=True)
+@pass_context
+def add_user_for_sites(
+	context, email, first_name, last_name, user_type, send_welcome_email, password, add_role
+):
+	"Add user to a site"
+	import frappe.utils.user
+
+	for site in context.sites:
+		frappe.connect(site=site)
+		try:
+			add_new_user(email, first_name, last_name, user_type, send_welcome_email, password, add_role)
+			frappe.db.commit()
+		finally:
+			frappe.destroy()
+	if not context.sites:
+		raise SiteNotSpecifiedError
+
+
 @click.command("disable-user")
 @click.argument("email")
 @pass_context
@@ -837,10 +863,13 @@ def publish_realtime(context, event, message, room, user, doctype, docname, afte
 
 @click.command("browse")
 @click.argument("site", required=False)
+@click.option("--user", required=False, help="Login as user")
 @pass_context
-def browse(context, site):
+def browse(context, site, user=None):
 	"""Opens the site on web browser"""
 	import webbrowser
+
+	from frappe.auth import CookieManager, LoginManager
 
 	site = context.sites[0] if context.sites else site
 
@@ -853,7 +882,24 @@ def browse(context, site):
 	site = site.lower()
 
 	if site in frappe.utils.get_sites():
-		webbrowser.open(frappe.utils.get_site_url(site), new=2)
+		frappe.init(site=site)
+		frappe.connect()
+
+		sid = ""
+		if user:
+			if frappe.conf.developer_mode or user == "Administrator":
+				frappe.utils.set_request(path="/")
+				frappe.local.cookie_manager = CookieManager()
+				frappe.local.login_manager = LoginManager()
+				frappe.local.login_manager.login_as(user)
+				sid = f"/app?sid={frappe.session.sid}"
+			else:
+				print("Please enable developer mode to login as a user")
+
+		url = f"{frappe.utils.get_site_url(site)}{sid}"
+		if user == "Administrator":
+			print(f"Login URL: {url}")
+		webbrowser.open(url, new=2)
 	else:
 		click.echo("\nSite named \033[1m{}\033[0m doesn't exist\n".format(site))
 
@@ -925,8 +971,38 @@ def build_search_index(context):
 		frappe.destroy()
 
 
+def add_new_user(
+	email,
+	first_name=None,
+	last_name=None,
+	user_type="System User",
+	send_welcome_email=False,
+	password=None,
+	role=None,
+):
+	user = frappe.new_doc("User")
+	user.update(
+		{
+			"name": email,
+			"email": email,
+			"enabled": 1,
+			"first_name": first_name or email,
+			"last_name": last_name,
+			"user_type": user_type,
+			"send_welcome_email": 1 if send_welcome_email else 0,
+		}
+	)
+	user.insert()
+	user.add_roles(*role)
+	if password:
+		from frappe.utils.password import update_password
+
+		update_password(user=user.name, pwd=password)
+
+
 commands = [
 	add_system_manager,
+	add_user_for_sites,
 	backup,
 	drop_site,
 	install_app,

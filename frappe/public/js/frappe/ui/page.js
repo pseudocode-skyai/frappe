@@ -179,19 +179,19 @@ frappe.ui.Page = Class.extend({
 	},
 
 	setup_overlay_sidebar() {
-		let overlay_sidebar = this.sidebar.find('.overlay-sidebar')
-			.addClass('opened');
+		this.sidebar.find(".close-sidebar").remove();
+		let overlay_sidebar = this.sidebar.find(".overlay-sidebar").addClass("opened");
 		$('<div class="close-sidebar">').hide().appendTo(this.sidebar).fadeIn();
-		let scroll_container = $('html')
-			.css("overflow-y", "hidden");
+		let scroll_container = $('html').css("overflow-y", "hidden");
 
-		this.sidebar.find(".close-sidebar").on('click', (e) => close_sidebar(e));
-		this.sidebar.on("click", "button:not(.dropdown-toggle)", (e) => close_sidebar(e));
+		this.sidebar.find(".close-sidebar").on("click", (e) => this.close_sidebar(e));
+		this.sidebar.on("click", "button:not(.dropdown-toggle)", (e) => this.close_sidebar(e));
 
-		let close_sidebar = () => {
+		this.close_sidebar = () => {
 			scroll_container.css("overflow-y", "");
 			this.sidebar.find("div.close-sidebar").fadeOut(() => {
-				overlay_sidebar.removeClass('opened')
+				overlay_sidebar
+					.removeClass('opened')
 					.find('.dropdown-toggle')
 					.removeClass('text-muted');
 			});
@@ -316,13 +316,14 @@ frappe.ui.Page = Class.extend({
 
 	//--- Menu --//
 
-	add_menu_item: function(label, click, standard, shortcut) {
+	add_menu_item: function(label, click, standard, shortcut, show_parent) {
 		return this.add_dropdown_item({
 			label,
 			click,
 			standard,
 			parent: this.menu,
-			shortcut
+			shortcut,
+			show_parent,
 		});
 	},
 
@@ -406,7 +407,7 @@ frappe.ui.Page = Class.extend({
 	*/
 	add_dropdown_item: function({label, click, standard, parent, shortcut, show_parent=true, icon=null}) {
 		if (show_parent) {
-			parent.parent().removeClass("hide");
+			parent.parent().removeClass("hide hidden-xl");
 		}
 
 		let $link = this.is_in_group_button_dropdown(parent, 'li > a.grey-link > span', label);
@@ -574,7 +575,15 @@ frappe.ui.Page = Class.extend({
 			let response = action();
 			me.btn_disable_enable(btn, response);
 		};
-		if(group) {
+		// Add actions as menu item in Mobile View
+		let menu_item_label = group ? `${group} > ${label}` : label;
+		let menu_item = this.add_menu_item(menu_item_label, _action, false, false, false);
+		menu_item.parent().addClass("hidden-xl");
+		if (this.menu_btn_group.hasClass("hide")) {
+			this.menu_btn_group.removeClass("hide").addClass("hidden-xl");
+		}
+
+		if (group) {
 			var $group = this.get_or_add_inner_group_button(group);
 			$(this.inner_toolbar).removeClass("hide");
 
