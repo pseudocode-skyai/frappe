@@ -16,6 +16,17 @@
   "column_break0",
   "full_name",
   "username",
+  "column_break0",
+  "contact_person_name",
+  "company_name",
+  "tax_id",
+  "tax_idupload_file",
+  "tobacco_lic",
+  "tobacco_lic_upload_file",
+  "column_break_jboxt",
+  "office_address",
+  "cell_phone_no",
+  "store_name",
   "column_break_11",
   "language",
   "time_zone",
@@ -606,7 +617,56 @@
    "fieldtype": "Link",
    "label": "Module Profile",
    "options": "Module Profile"
-  }
+  },
+  {
+    "fieldname": "contact_person_name",
+    "fieldtype": "Data",
+    "label": "Contact Person Name"
+   },
+   {
+    "fieldname": "company_name",
+    "fieldtype": "Data",
+    "label": "Company name"
+   },
+   {
+    "fieldname": "tax_id",
+    "fieldtype": "Data",
+    "label": "Tax Id"
+   },
+   {
+    "fieldname": "tax_idupload_file",
+    "fieldtype": "Data",
+    "label": "Tax ID'(Upload file)"
+   },
+   {
+    "fieldname": "tobacco_lic",
+    "fieldtype": "Data",
+    "label": "Tobacco Lic"
+   },
+   {
+    "fieldname": "tobacco_lic_upload_file",
+    "fieldtype": "Data",
+    "label": "Tobacco Lic (Upload file))"
+   },
+   {
+    "fieldname": "office_address",
+    "fieldtype": "Data",
+    "label": "Office Address"
+   },
+   {
+    "fieldname": "cell_phone_no",
+    "fieldtype": "Int",
+    "label": "Cell Phone No"
+   },
+   {
+    "fieldname": "store_name",
+    "fieldtype": "Data",
+    "label": "Store Name"
+   },
+   {
+    "fieldname": "column_break_jboxt",
+    "fieldtype": "Column Break"
+   }
  ],
  "icon": "fa fa-user",
  "idx": 413,
@@ -701,7 +761,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "title_field": "full_name",
  "track_changes": 1
 }

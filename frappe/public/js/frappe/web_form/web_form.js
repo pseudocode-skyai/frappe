@@ -160,9 +160,9 @@ export default class WebForm extends frappe.ui.FieldGroup {
 	}
 
 	setup_primary_action() {
-		this.add_button_to_header(this.button_label || __("Save", null, "Button in web form"), "primary", () =>
-			this.save()
-		);
+		// this.add_button_to_header(this.button_label || __("Save", null, "Button in web form"), "primary", () =>
+		// 	this.save()
+		// );
 
 		this.add_button_to_footer(this.button_label || __("Save", null, "Button in web form"), "primary", () =>
 			this.save()
@@ -170,7 +170,7 @@ export default class WebForm extends frappe.ui.FieldGroup {
 	}
 
 	setup_cancel_button() {
-		this.add_button_to_header(__("Cancel", null, "Button in web form"), "light", () => this.cancel());
+		this.add_button_to_footer(__("Cancel", null, "Button in web form"), "light", () => this.cancel());
 	}
 
 	setup_delete_button() {
