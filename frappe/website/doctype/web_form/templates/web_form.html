@@ -25,7 +25,7 @@ data-web-form="{{ name }}" data-web-form-doctype="{{ doc_type }}" data-login-req
 {% endmacro %}
 
 {% block page_content %}
-<div>
+<div class="container">
 	{% if is_list %}
 	{# web form list #}
 	<div class="web-form-wrapper" {{ container_attributes() }}></div>
@@ -38,7 +38,7 @@ data-web-form="{{ name }}" data-web-form-doctype="{{ doc_type }}" data-login-req
 		<div id="introduction" class="text-muted"></div>
 		<hr>
 		<div class="web-form-wrapper" {{ container_attributes() }}></div>
-		<div class="web-form-footer" style="padding-left: 45rem;"></div>
+		<div class="web-form-footer"></div>
 	</div>
 
 	{% if show_attachments and not frappe.form_dict.new and attachments %}
