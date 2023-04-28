@@ -139,7 +139,7 @@ class User(Document):
 			frappe.cache().delete_key("enabled_users")
 		#create new enrty in User Permission doctype
 		
-		if self.region != "HO":
+		if self.region != "HO" or self.email != "admin@example.com" :
 			if frappe.db.exists({"doctype": "User Permission", "user": self.email}):
 				pass
 			else:
