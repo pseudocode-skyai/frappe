@@ -1235,8 +1235,14 @@ def share_doc_with_approver(doc, user):
 @frappe.whitelist()
 def create_region_wise_user_permission(region,email):
 	if region != "HO" or email not in ["admin@example.com", "admin@example.co"]:
-		create_user_permission = frappe.new_doc("User Permission")
-		create_user_permission.user = email
-		create_user_permission.allow = "Region"
-		create_user_permission.for_value = region
-		create_user_permission.insert(ignore_mandatory=True, ignore_permissions=True)
+		if frappe.db.exists({"doctype": "User Permission", "user": email}):
+			user_permission = frappe.get_doc("User Permission", {"user": email, "allow": "Region"})
+			if user_permission:
+				user_permission.for_value = region
+				user_permission.save()
+		else:
+			create_user_permission = frappe.new_doc("User Permission")
+			create_user_permission.user = email
+			create_user_permission.allow = "Region"
+			create_user_permission.for_value = region
+			create_user_permission.insert(ignore_mandatory=True, ignore_permissions=True)

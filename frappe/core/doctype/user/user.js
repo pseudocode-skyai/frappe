@@ -47,8 +47,6 @@ frappe.ui.form.on('User', {
 			})
 		}
 	},
-
-
 	module_profile: function(frm) {
 		if (frm.doc.module_profile) {
 			frappe.call({
