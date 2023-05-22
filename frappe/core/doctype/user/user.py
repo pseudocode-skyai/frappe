@@ -116,14 +116,6 @@ class User(Document):
 			frappe.throw(_("Not a valid User Image."))
 
 	def on_update(self):
-		if self.region != "HO" or self.email not in ["admin@example.com", "admin@example.co"]:
-			if not frappe.db.exists({"doctype": "User Permission", "user": self.email}):
-				create_user_permission = frappe.new_doc("User Permission")
-				create_user_permission.user = self.email	
-				create_user_permission.allow = "Region"
-				create_user_permission.for_value = self.region
-				create_user_permission.insert(ignore_mandatory=True, ignore_permissions=True)
-
 		# clear new password
 		self.share_with_self()
 		clear_notifications(user=self.name)
@@ -1237,3 +1229,14 @@ def share_doc_with_approver(doc, user):
 		approver = approvers.get(doc.doctype)
 		if doc_before_save.get(approver) != doc.get(approver):
 			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
+
+
+
+@frappe.whitelist()
+def create_region_wise_user_permission(region,email):
+	if region != "HO" or email not in ["admin@example.com", "admin@example.co"]:
+		create_user_permission = frappe.new_doc("User Permission")
+		create_user_permission.user = email
+		create_user_permission.allow = "Region"
+		create_user_permission.for_value = region
+		create_user_permission.insert(ignore_mandatory=True, ignore_permissions=True)

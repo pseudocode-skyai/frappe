@@ -36,6 +36,18 @@ frappe.ui.form.on('User', {
 			});
 		}
 	},
+	region:function(frm){
+		if (frm.doc.region) {
+			frappe.call({
+				"method": "frappe.core.doctype.user.user.create_region_wise_user_permission",
+				args: {
+					region: frm.doc.region,
+					email: frm.doc.email
+				},
+			})
+		}
+	},
+
 
 	module_profile: function(frm) {
 		if (frm.doc.module_profile) {
