@@ -166,9 +166,11 @@ class Dashboard {
 			return items;
 		});
 	}
-
 	set_dropdown() {
 		this.page.clear_menu();
+		this.page.add_menu_item(__('Print'), () => {
+			this.printDashboard();
+		  });
 
 		/* this.page.add_menu_item(__('Edit'), () => {
 			frappe.set_route('Form', 'Dashboard', frappe.dashboard.dashboard_name);
@@ -194,4 +196,17 @@ class Dashboard {
 			});
 		}); */
 	}
+	printDashboard() {
+        
+        const dropdown = document.querySelector('.menu-btn-group');
+
+        // Hide the dropdown
+        dropdown.style.display = 'none';
+
+        // Print the dashboard
+        window.print();
+
+        // Show the dropdown after printing
+        dropdown.style.display = '';
+    }
 }
