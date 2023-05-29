@@ -653,8 +653,7 @@
   {
    "fieldname": "user_id",
    "fieldtype": "Data",
-   "label": "User Id",
-   "reqd": 1
+   "label": "User Id"
   },
   {
    "fieldname": "reports_to",
