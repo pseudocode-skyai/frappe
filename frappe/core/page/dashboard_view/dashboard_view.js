@@ -167,36 +167,37 @@ class Dashboard {
 		});
 	}
 	set_dropdown() {
-		this.page.clear_menu();
-		this.page.add_menu_item(__('Print'), () => {
-			this.printDashboard();
-		  });
-
-		/* this.page.add_menu_item(__('Edit'), () => {
-			frappe.set_route('Form', 'Dashboard', frappe.dashboard.dashboard_name);
-		}); */
-
-/* 		this.page.add_menu_item(__('New'), () => {
-			frappe.new_doc('Dashboard');
-		});
- */
-/* 		this.page.add_menu_item(__('Refresh All'), () => {
-			this.chart_group &&
-				this.chart_group.widgets_list.forEach(chart => chart.refresh());
-			this.number_card_group &&
-				this.number_card_group.widgets_list.forEach(card => card.render_card());
-		}); */
-
-/* 		frappe.db.get_list('Dashboard').then(dashboards => {
-			dashboards.map(dashboard => {
-				let name = dashboard.name;
-				if (name != this.dashboard_name) {
-					this.page.add_menu_item(name, () => frappe.set_route("dashboard-view", name), 1);
-				}
-			});
-		}); */
-	}
-	printDashboard() {
+        this.page.clear_menu();
+      
+       /*  this.page.add_menu_item(__('Edit'), () => {
+          frappe.set_route('Form', 'Dashboard', frappe.dashboard.dashboard_name);
+        }); */
+      
+    /*     this.page.add_menu_item(__('New'), () => {
+          frappe.new_doc('Dashboard');
+        }); */
+      
+      /*   this.page.add_menu_item(__('Refresh All'), () => {
+          this.chart_group &&
+            this.chart_group.widgets_list.forEach(chart => chart.refresh());
+          this.number_card_group &&
+            this.number_card_group.widgets_list.forEach(card => card.render_card());
+        }); */
+      
+        this.page.add_menu_item(__('Print'), () => {
+          this.printDashboard();
+        });
+      
+        /* frappe.db.get_list('Dashboard').then(dashboards => {
+          dashboards.map(dashboard => {
+            let name = dashboard.name;
+            if (name != this.dashboard_name) {
+              this.page.add_menu_item(name, () => frappe.set_route("dashboard-view", name), 1);
+            }
+          });
+        }); */
+      }
+      printDashboard() {
         const dropdownButton = document.querySelector('.menu-btn-group button');
         const dropdownMenu = document.querySelector('.menu-btn-group .dropdown-menu');
         const dropdownDots = document.querySelectorAll('.card-actions.dropdown.pull-right');
