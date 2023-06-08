@@ -304,7 +304,7 @@ frappe.ui.form.Toolbar = class Toolbar {
 			me.frm.reload_doc();
 		}, true); */
 
-/* 		// delete
+		// delete
 		if((cint(me.frm.doc.docstatus) != 1) && !me.frm.doc.__islocal
 			&& frappe.model.can_delete(me.frm.doctype)) {
 			this.page.add_menu_item(__("Delete"), function() {
@@ -314,7 +314,7 @@ frappe.ui.form.Toolbar = class Toolbar {
 				condition: () => !this.frm.is_new()
 			});
 		}
- */
+
 		// this.make_customize_buttons();
 
 /* 		// Auto Repeat
