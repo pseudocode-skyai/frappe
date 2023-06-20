@@ -16,6 +16,7 @@
   "column_break0",
   "full_name",
   "username",
+  "designation",
   "column_break_11",
   "language",
   "time_zone",
@@ -606,6 +607,13 @@
    "fieldtype": "Link",
    "label": "Module Profile",
    "options": "Module Profile"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-user",
@@ -668,7 +676,7 @@
    "link_fieldname": "user"
   }
  ],
- "modified": "2022-09-19 16:10:56.745069",
+ "modified": "2023-06-20 17:41:55.456956",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "User",
@@ -701,7 +709,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "title_field": "full_name",
  "track_changes": 1
 }
