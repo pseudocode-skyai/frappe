@@ -1,7 +1,7 @@
 {%- if not no_breadcrumbs and parents -%}
 <div class="breadcrumb-container container">
-	<nav aria-label="breadcrumb">
-		<ol class="breadcrumb" itemscope itemtype="http://schema.org/BreadcrumbList">
+	<nav class="container" aria-label="breadcrumb">
+		<ol class="breadcrumb pb-0" itemscope itemtype="http://schema.org/BreadcrumbList">
 			{%- set parents = parents[-3:] %}
 			{% set count = (parents | length) + 1 %}
 			{% for parent in parents %}

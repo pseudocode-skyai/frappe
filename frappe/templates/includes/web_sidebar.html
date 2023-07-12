@@ -75,15 +75,6 @@
 </ul>
 {% endif %}
 {% endmacro %}
-{% macro saved_cards() %}
-{% if frappe.user != 'Guest' %}
-<ul class="list-unstyled">
-    <li class="sidebar-item">
-        <a href="/saved-card">{{ _("Saved Cards") }}</a>
-    </li>
-</ul>
-{% endif %}
-{% endmacro %}
 {% macro address() %}
 {% if frappe.user != 'Guest' %}
 <ul class="list-unstyled">
@@ -115,7 +106,6 @@
         {{ support() }}
         {{ my_profile() }}
         {{ address() }}
-        {{ saved_cards() }}
         {{ change_password() }}
     </div>
 </div>
