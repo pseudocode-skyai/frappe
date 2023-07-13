@@ -13,9 +13,9 @@ frappe.ui.form.ControlAttach = frappe.ui.form.ControlData.extend({
 					<i class="fa fa-paperclip"></i>
 					<a class="attached-file-link" target="_blank"></a>
 				</div>
-				<div>
-					<a class="btn btn-xs btn-default" data-action="reload_attachment">${__('Reload File')}</a>
-					<a class="btn btn-xs btn-default" data-action="clear_attachment">${__('Clear')}</a>
+				<div style="display: inherit;">
+					<a class="btn btn-xs btn-default p-0 m-1" data-action="reload_attachment" style="cursor: pointer;">${__('Reload File')}</a>
+					<a class="btn btn-xs btn-default p-0 m-1" data-action="clear_attachment" style="cursor: pointer;">${__('Clear')}</a>
 				</div>
 			</div>`)
 			.prependTo(me.input_area)
