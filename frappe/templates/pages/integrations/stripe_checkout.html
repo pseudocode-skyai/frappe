@@ -1,15 +1,12 @@
 {% extends "templates/web.html" %}
-
 {% block title %} Payment {% endblock %}
-
 {%- block header -%}
+<h2 class="text-center" style="margin-left: 30rem;">{{description}}</h2>
 {% endblock %}
-
 {% block script %}
 <script src="https://js.stripe.com/v3/"></script>
 <script>{% include "templates/includes/integrations/stripe_checkout.js" %}</script>
 {% endblock %}
-
 {%- block page_content -%}
 
 <div class="stripe" style="min-height: 400px; padding-bottom: 50px; margin-top:100px;margin-left:250px;">
@@ -103,6 +100,5 @@
 		
 	</div>
 </div>
-
-
+</div>
 {% endblock %}
