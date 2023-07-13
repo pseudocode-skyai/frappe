@@ -8,48 +8,97 @@
 <script>{% include "templates/includes/integrations/stripe_checkout.js" %}</script>
 {% endblock %}
 {%- block page_content -%}
-<div class="stripe"  style="min-height: 400px; padding-bottom: 95px;padding-top: 30px;border-left-style: solid;border-left-width: 0px;margin-right: 30rem;padding-left: 0px;padding-right: 0px;margin-left: 30rem;">
-    <div class="frappe-card" >
-<a href="#" data-toggle="collapse" data-target="#collapse1" aria-expanded="true" class="">
-        <h6 class="title" style="margin-bottom: 10px;margin-top: 10px;">Credit / Debit / ATM Card</h6>
-</a>
-    <div class="col-sm-10 col-sm-offset-2 collapse" id="collapse1" style="padding-left: 0px; padding-right: 0px; right: -52px;top: -25px;">
-        {% if image %}
-            <img src={{image}}>
-        {% endif %}
-        <form id="payment-form">
-            <div class="form-row row" style="margin-left: 0px;margin-right: -193px;">
-                <div class="col-9" style="margin-bottom: 15px;">
-                    <div style="display: inline-flex;">
-                        <label>
-                            <span style="float: none;">{{ _("Name") }}</span>
-                        </label>
-                        <input id="cardholder-name" style="margin-left: 70px;" name="cardholder-name" class="field" placeholder="{{ _('John Doe') }}" value="{{payer_name}}"/>
-                    </div>
+
+<div class="stripe" style="min-height: 400px; padding-bottom: 50px; margin-top:100px;margin-left:250px;">
+	<div class="col-sm-10 col-sm-offset-2">
+		{% if image %}
+			<img src={{image}}>
+		{% endif %}
+		<h2 class="text-center">{{description}}</h2>
+		<div class="accordion" id="accordionExample">
+        <div class="card payment-card m-4">
+            <div class="card-header collapsed" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true">
+				<span><i class="fa fa-credit-card" style="font-size:20px"></i></span>    
+                <span class="title">Credit / Debit / ATM Card</span>
+                <span class="accicon"><i class="fa fa-angle-down rotate-icon"></i></span>
+            </div>
+            <div id="collapseOne" class="collapse" data-parent="#accordionExample">
+                <div class="card-body">
+                    <form id="payment-form mt-0">
+			<div class="form-row row">
+				<div class="group col-12">
+					<div>
+						<label>
+							<span>{{ _("Name") }}</span>
+						<input id="cardholder-name" name="cardholder-name" class="field" placeholder="{{ _('John Doe') }}" value="{{payer_name}}"/>
+					</label>
+					</div>
+				</div>
+				<div class="group col-12">
+					<div>
+						<label>
+							<span>{{ _("Email") }}</span>
+						<input id="cardholder-email" name="cardholder-email" class="field" placeholder="{{ _('john@doe.com') }}" value="{{payer_email}}"/>
+					</label>
+					</div>
+				</div>
+				<div class="group col-12">
+					<label>
+					<span>{{ _("Card Details") }}</span>
+				<div id="card-element" name="card-element" class="field"></div>
+				<div id="card-errors" role="alert"></div>
+			</label>
+			</div>
+
+			</div>
+			<button type="submit" class="btn-outline-primary payment-btn submit pl-4 pr-4" id="submit">{{_('Pay')}} {{amount}}</button>
+			<div class="outcome text-center">
+				<div class="error" hidden>{{ _("An error occured during the payment process. Please contact us.") }}</div>
+				<div class="success" hidden>{{ _("Your payment has been successfully registered.") }}</div>
+			</div>
+					</form>
                 </div>
-                <div class="col-9" style="margin-bottom: 15px;">
-                    <div style="display: inline-flex;">
-                        <label>
-                            <span style="float: none;">{{ _("Email") }}</span>
-                        </label>
-                        <input id="cardholder-email" style="margin-left: 70px;" name="cardholder-email" class="field" placeholder="{{ _('john@doe.com') }}" value="{{payer_email}}"/>
-                    </div>
+            </div>
+        </div>
+        <div class="card payment-card m-4">
+            <div class="card-header collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">     
+                <span><i class="fa fa-google-wallet" style="font-size:20px"></i></span>
+				<span class="title">UPI</span>
+                <span class="accicon"><i class="fa fa-angle-down rotate-icon"></i></span>
+            </div>
+            <div id="collapseTwo" class="collapse" data-parent="#accordionExample">
+                <div class="card-body">
+                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
                 </div>
-                <div class="col-9" style="display: inline-flex;margin-bottom: 15px;">
-                    <label>
-                    <span style="float: none;">{{ _("Card Details") }}</span>
-                </label>
-                <div id="card-element" name="card-element" class="field" style="margin-left: 35px;"></div>
             </div>
-            <div id="card-errors" role="alert"></div>
-            <button type="submit" class="submit" id="submit" style="background-color: transparent;border: 1px solid #EDAC2A !important;color: #EDAC2A;text-transform: uppercase;box-shadow: none;border-radius: 10px;padding-left: 40px;padding-right: 40px;margin-right: 12rem;margin-left: 11rem;">{{_('Pay')}} {{amount}}</button>
+        </div>
+        <div class="card payment-card m-4">
+            <div class="card-header collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false">
+                <span><i class="fa fa-cc-paypal" style="font-size:20px"></i></span>
+				<span class="title">Payment Wallet</span>
+                <span class="accicon"><i class="fa fa-angle-down rotate-icon"></i></span>
             </div>
-            <div class="outcome text-center">
-                <div class="error" hidden>{{ _("An error occured during the payment process. Please contact us.") }}</div>
-                <div class="success" hidden>{{ _("Your payment has been successfully registered.") }}</div>
+            <div id="collapseThree" class="collapse" data-parent="#accordionExample">
+                <div class="card-body">
+                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                </div>
             </div>
-        </form>
+        </div>
+		<div class="card payment-card m-4">
+            <div class="card-header collapsed" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false">
+				<span><i class="fa fa-bank" style="font-size:20px"></i></span>
+                <span class="title">Net Banking</span>
+                <span class="accicon"><i class="fa fa-angle-down rotate-icon"></i></span>
+            </div>
+            <div id="collapseFour" class="collapse" data-parent="#accordionExample">
+                <div class="card-body">
+                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                </div>
+            </div>
+        </div>
     </div>
+		
+	</div>
 </div>
 </div>
 {% endblock %}
