@@ -3,26 +3,25 @@
 {% block title %}{{ _("Payment Success") }}{% endblock %}
 
 {%- block page_content -%}
-<div class='page-card'>
-	<div class='page-card-head'>
-		<span class='indicator green'>
-			{{ _("Success") }}</span>
+<div class="page-card" style="max-width: 100%;border: none;box-shadow: none;">
+<div style="display: flex;flex-direction: column;align-items: center;justify-content: center;">
+	<div class="text-center confirme-order">
+		<img src="/assets/innkeeper_customapp/images/confirme.png">
+		<h3 style="color: green;"><b>Order Confirmed</b></h3>
+		<p>{{ payment_message or _("Your payment was successfully accepted. You will recieve an order confirmation email/ <br> SMS shortly with the expected delivery date for your items.") }}</p>
 	</div>
-	<p>{{ payment_message or _("Your payment was successfully accepted") }}</p>
 	{% if not payment_message %}
-		<div>
-			<a
-			   href='{{ frappe.form_dict.redirect_to or "/" }}'
-			   class='btn btn-primary btn-sm'>
-				{{ _("Continue") }}
-			</a>
-		</div>
+	<div class="col-8 text-center">
+		<a href="/all-products" class="btn btn-outline-primary col-4 mr-4">CONTINUE SHOPPING</a>
+		<a href="/orders" class="btn btn-primary col-4">VIEW ORDER</a>
+	</div>
 	{% endif %}
+</div>
 </div>
 <style>
 {% include "templates/styles/card_style.css" %}
 </style>
-<script>
+<!-- <script>
 	frappe.ready(function() {
 		if('{{ frappe.form_dict.redirect_to or "" }}'){
 			setTimeout(function(){
@@ -30,5 +29,5 @@
 			}, 4000);
 		}
 	})
-</script>
+</script> -->
 {% endblock %}
