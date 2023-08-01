@@ -197,44 +197,44 @@ class Dashboard {
           });
         }); */
       }
-      printDashboard() {
-        const dropdownButton = document.querySelector('.menu-btn-group button');
-        const dropdownMenu = document.querySelector('.menu-btn-group .dropdown-menu');
-        const dropdownDots = document.querySelectorAll('.card-actions.dropdown.pull-right');
-        const dropdownChart = document.querySelectorAll('.chart-actions.dropdown.pull-right');
-        const dropdownFilter = document.querySelectorAll('.icon.icon-sm');
-        // Remove the menu and downward arrow icon from the dropdown button
-        dropdownButton.innerHTML = '';
-        // Hide the dropdown menu
-        dropdownMenu.style.display = 'none';
-        // Hide the dropdown dots for all cards
-        dropdownDots.forEach((dots) => {
-          dots.style.display = 'none';
-        });
-        // Hide the dropdown chart dots for all charts
-        dropdownChart.forEach((dots) => {
-          dots.style.display = 'none';
-        });
-        // Hide the dropdown filter icons for all charts
-        dropdownFilter.forEach((icon) => {
-          icon.style.display = 'none';
-        });
-        // Print the dashboard
-        window.print();
-        // Show the dropdown button and menu after printing
-        dropdownButton.innerHTML = '<svg class="icon icon-sm"><use href="#icon-dot-horizontal"></use></svg>';
-        dropdownMenu.style.display = '';
-        // Show the dropdown dots for all cards after printing
-        dropdownDots.forEach((dots) => {
-          dots.style.display = '';
-        });
-        // Show the dropdown chart dots for all charts after printing
-        dropdownChart.forEach((dots) => {
-          dots.style.display = '';
-        });
-        // Show the dropdown filter icons for all charts after printing
-        dropdownFilter.forEach((icon) => {
-          icon.style.display = '';
-        });
-    }
+    //   printDashboard() {
+    //     const dropdownButton = document.querySelector('.menu-btn-group button');
+    //     const dropdownMenu = document.querySelector('.menu-btn-group .dropdown-menu');
+    //     const dropdownDots = document.querySelectorAll('.card-actions.dropdown.pull-right');
+    //     const dropdownChart = document.querySelectorAll('.chart-actions.dropdown.pull-right');
+    //     const dropdownFilter = document.querySelectorAll('.icon.icon-sm');
+    //     // Remove the menu and downward arrow icon from the dropdown button
+    //     dropdownButton.innerHTML = '';
+    //     // Hide the dropdown menu
+    //     dropdownMenu.style.display = 'none';
+    //     // Hide the dropdown dots for all cards
+    //     dropdownDots.forEach((dots) => {
+    //       dots.style.display = 'none';
+    //     });
+    //     // Hide the dropdown chart dots for all charts
+    //     dropdownChart.forEach((dots) => {
+    //       dots.style.display = 'none';
+    //     });
+    //     // Hide the dropdown filter icons for all charts
+    //     dropdownFilter.forEach((icon) => {
+    //       icon.style.display = 'none';
+    //     });
+    //     // Print the dashboard
+    //     window.print();
+    //     // Show the dropdown button and menu after printing
+    //     dropdownButton.innerHTML = '<svg class="icon icon-sm"><use href="#icon-dot-horizontal"></use></svg>';
+    //     dropdownMenu.style.display = '';
+    //     // Show the dropdown dots for all cards after printing
+    //     dropdownDots.forEach((dots) => {
+    //       dots.style.display = '';
+    //     });
+    //     // Show the dropdown chart dots for all charts after printing
+    //     dropdownChart.forEach((dots) => {
+    //       dots.style.display = '';
+    //     });
+    //     // Show the dropdown filter icons for all charts after printing
+    //     dropdownFilter.forEach((icon) => {
+    //       icon.style.display = '';
+    //     });
+    // }
 }
