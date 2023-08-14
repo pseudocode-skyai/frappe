@@ -4,21 +4,47 @@
 
 {% block page_content %}
 
-<script>
-	window.is_404 = true;
-</script>
+<section>
+    <div class="container-fluid section-padding page-banner-con mh-auto">
+        <!-- <div class="page-banner-img"><img src="/assets/herbiary_customapp/images/about-banner.png" /></div> -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 col-md-10 col-lg-6">
+                    <div class="page-banner-text">
+                        <h1>Page Not Found</h1>
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section>
+	<div class="container-fluid section-padding"> 
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="text-con text-center">
+						
+						<script>
+							window.is_404 = true;
+						</script>
 
-<div class="error-page">
-	<img class="img-404" src="/assets/frappe/images/ui-states/404.png" />
-	<div>
-		<h2 class="mb-1 mt-4">
-			{{ _("There's nothing here") }}
-		</h2>
-		<div class="text-muted error-text">
-			{{ _("The page you are looking for has gone missing.") }}
+						<div class="error-page">
+							<img class="img-404" src="/assets/frappe/images/ui-states/404.png" />
+							<div>
+								<h3>
+									{{ _("There's nothing here") }}
+								</h3>
+								<p class="text-muted error-text">
+									{{ _("The page you are looking for has gone missing.") }}
+								</p>
+								<div class="mt-6 back-to-home"><a href='/' class='btn btn-primary'>{{ _("Back to Home") }}</a></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>                    
 		</div>
-		<div class="mt-6 back-to-home"><a href='/' class='btn btn-primary'>{{ _("Back to Home") }}</a></div>
 	</div>
-</div>
-
+</section> 
 {% endblock %}

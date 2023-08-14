@@ -4,7 +4,7 @@
 
 {% block page_content %}
 
-{{ web_block("Hero",
+<!-- {{ web_block("Hero",
 	values={
 		'title': blog_title or _("Blog"),
 		'subtitle': blog_introduction or '',
@@ -13,26 +13,53 @@
 	add_top_padding=0,
 	add_bottom_padding=0,
 	css_class="py-5"
-) }}
-
-<div class="blog-list-content">
-	<div class="website-list" data-doctype="{{ doctype }}" data-txt="{{ txt or '[notxt]' | e }}">
-		{% if not result -%}
-		<div class="text-muted" style="min-height: 300px;">
-			{{ no_result_message or _("Nothing to show") }}
-		</div>
-		{% else %}
-		<div id="blog-list" class="blog-list result row">
-			{% for item in result %}
-			{{ item }}
-			{% endfor %}
-		</div>
-		{% endif %}
-		<button class="btn btn-light btn-more btn {% if not show_more -%} hidden {%- endif %}">{{ _("Load More") }}</button>
-	</div>
-</div>
-{% endblock %}
-
-{% block script %}
-<script>{% include "templates/includes/list/list.js" %}</script>
-{% endblock %}
+) }} -->
+<section>
+    <div class="container-fluid section-padding page-banner-con">
+        <!-- <div class="page-banner-img"><img src="/assets/herbiary_customapp/images/about-banner.png" /></div> -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12 col-md-10 col-lg-6">
+                    <div class="page-banner-text">
+                        <h1>Blog</h1>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor magna aliqua. </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section>
+    <div class="container-fluid section-padding blog-page-con">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="page-banner-text">
+						<div class="blog-list-content">
+							<div class="website-list" data-doctype="{{ doctype }}" data-txt="{{ txt or '[notxt]' | e }}">
+								{% if not result -%}
+								<div class="text-muted" style="min-height: 300px;">
+									{{ no_result_message or _("Nothing to show") }}
+								</div>
+								{% else %}
+								<div id="blog-list" class="blog-list result row">
+									{% for item in result %}
+									{{ item }}
+									{% endfor %}
+								</div>
+								{% endif %}
+								<button class="btn btn-light btn-more btn {% if not show_more -%} hidden {%- endif %}">{{ _("Load More") }}</button>
+							</div>
+						</div>
+						{% endblock %}
+						
+						{% block script %}
+						<script>{% include "templates/includes/list/list.js" %}</script>
+						{% endblock %}
+						
+					</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
