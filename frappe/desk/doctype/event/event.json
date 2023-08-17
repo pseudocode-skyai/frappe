@@ -221,7 +221,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nClosed\nLead Transfer"
+   "options": "Open\nClosed\nLead Transfer\nTravel Form To Be Check\nTravel Form To Be Approved\nTravel Form Approved"
   },
   {
    "collapsible": 1,
@@ -270,14 +270,13 @@
    "fieldname": "sender",
    "fieldtype": "Data",
    "label": "Sender",
-   "options": "Email",
-   "read_only": 1
+   "options": "Email"
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2023-01-09 12:43:36.548933",
+ "modified": "2023-08-16 13:16:42.545158",
  "modified_by": "Administrator",
  "module": "Desk",
  "name": "Event",
