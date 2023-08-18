@@ -26,62 +26,62 @@
 		</ul>
 	</div>
 </div> -->
-
-                    <div class="two-box-col">
-                        <div class="edit-box-con">
-                            <div class="edit-box-head">
-                                <div class="title-editicon-box">
-                                    <div class="user-img-name-con"> 
-                                        <div class="user-img-name-img">
-                                            <span class="user-img-name-img-cir"><img src="/assets/herbiary_customapp/images/user-img.png"/></span>
-                                        </div>
-                                        <div class="user-img-name-title">John Doe </div>
-                                    </div>
-                                    <a href="#" class="edit-icon-fixed"><img src="/assets/herbiary_customapp/images/edit-icon.svg"/></a>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="edit-box-body">
-                                
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="title-editicon-box">
-                                            <div class="md-title-color"> Personal information</div>
-                                            <a href="#" class="edit-icon-fixed"><img src="/assets/herbiary_customapp/images/edit-icon.svg"/></a>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-12">
-                                        <div class="edit-text-con">
-                                            <div class="row">
-                                                <div class="col-sm-12-col-md-6 col-lg-6">
-                                                    <div class="edit-text-col">
-                                                        <div class="edit-text-title"><label>First Name </label></div>
-                                                        <div class="edit-text-sub-title"><label class="light-bleck-color">John</label></div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-sm-12-col-md-6 col-lg-6">
-                                                    <div class="edit-text-col">
-                                                        <div class="edit-text-title"><label>Last Name </label></div>
-                                                        <div class="edit-text-sub-title"><label class="light-bleck-color">doe</label></div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-sm-12-col-md-6 col-lg-6">
-                                                    <div class="edit-text-col">
-                                                        <div class="edit-text-title"><label>Email Address </label></div>
-                                                        <div class="edit-text-sub-title"><label class="light-bleck-color">jognduoe@gmail.com</label></div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-sm-12-col-md-6 col-lg-6">
-                                                    <div class="edit-text-col">
-                                                        <div class="edit-text-title"><label>Phone Number </label></div>
-                                                        <div class="edit-text-sub-title"><label class="light-bleck-color">+ 91 483 484 85</label></div>
-                                                    </div>
-                                                </div>
-                                            </div>  
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+{% set user_image, full_name, email, username, user_type, first_name, last_name, mobile_no = frappe.db.get_value("User", frappe.session.user, ["user_image","full_name","email", "username", "user_type", "first_name", "last_name", "mobile_no"]) %}
+<div class="two-box-col">
+    <div class="edit-box-con">
+        <div class="edit-box-head">
+            <div class="title-editicon-box">
+                <div class="user-img-name-con"> 
+                    <div class="user-img-name-img">
+                        <span class="user-img-name-img-cir"><img src="{{ user_image }}"/></span>
                     </div>
+                    <div class="user-img-name-title">{{ full_name }}</div>
+                </div>
+                <a href="/update-profile?name={{ user }}" class="edit-icon-fixed"><img src="/assets/herbiary_customapp/images/edit-icon.svg"/></a>
+            </div>
+        </div>
+        <hr>
+        <div class="edit-box-body">
+            
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="title-editicon-box">
+                        <div class="md-title-color"> Personal information</div>
+                        <a href="/update-profile?name={{ user }}" class="edit-icon-fixed"><img src="/assets/herbiary_customapp/images/edit-icon.svg"/></a>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="edit-text-con">
+                        <div class="row">
+                            <div class="col-sm-12-col-md-6 col-lg-6">
+                                <div class="edit-text-col">
+                                    <div class="edit-text-title"><label>First Name </label></div>
+                                    <div class="edit-text-sub-title"><label class="light-bleck-color">{{ first_name }}</label></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12-col-md-6 col-lg-6">
+                                <div class="edit-text-col">
+                                    <div class="edit-text-title"><label>Last Name </label></div>
+                                    <div class="edit-text-sub-title"><label class="light-bleck-color">{{ last_name }}</label></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12-col-md-6 col-lg-6">
+                                <div class="edit-text-col">
+                                    <div class="edit-text-title"><label>Email Address </label></div>
+                                    <div class="edit-text-sub-title"><label class="light-bleck-color">{{ email }}</label></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12-col-md-6 col-lg-6">
+                                <div class="edit-text-col">
+                                    <div class="edit-text-title"><label>Phone Number </label></div>
+                                    <div class="edit-text-sub-title"><label class="light-bleck-color">+ 91 {{ mobile_no }}</label></div>
+                                </div>
+                            </div>
+                        </div>  
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

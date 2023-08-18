@@ -41,6 +41,20 @@
 		<a href="/me">{{ _("My Account") }}</a>
 	</li>
 </ul>
+<hr>
+{% endif %}
+{% endmacro %}
+
+{% macro user_data() %}
+{% set full_name, email = frappe.db.get_value("User", frappe.session.user, ["full_name","email"]) %}
+{% if frappe.user != 'Guest' %}
+<ul class="list-unstyled">
+	<li class="sidebar-item">
+		<h5>Hello {{ full_name }}</h5>
+		<p>{{ email }}</p>
+	</li>
+</ul>
+<hr>
 {% endif %}
 {% endmacro %}
 
@@ -51,6 +65,7 @@
 	</li>
 	{% endif %}
 	<div class="sidebar-items">
+		{{ user_data() }}
 		{{ render_sidebar_items(sidebar_items) }}
 		{{ my_account() }}
 	</div>
