@@ -65,13 +65,14 @@
 {% if frappe.user != 'Guest' %}
 <ul class="list-unstyled">
     <li class="sidebar-item">
-        {% set email, username = frappe.db.get_value("User", frappe.session.user, ["email", "username"]) %}
+        <!-- {% set email, username = frappe.db.get_value("User", frappe.session.user, ["email", "username"]) %}
         {% if username == "administrator" %}
         <a class="pl-0 font-weight-bold" href="/update-profile?name={{ username }}">{{ _("My Profile") }}</a>
         {% else %}
         <a class="pl-0 font-weight-bold" href="/update-profile?name={{ email }}">{{ _("My Profile") }}</a>
-        {% endif %}
+        {% endif %} -->
         <!-- <a href="/update-profile">{{ _("My Profile") }}</a> -->
+        <a class="pl-0 font-weight-bold" href="/me">{{ _("My Profile") }}</a>
     </li>
 </ul>
 {% endif %}

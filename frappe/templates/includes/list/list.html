@@ -8,12 +8,20 @@
 {% else %}
 	<div class="website-list" data-doctype="{{ doctype }}"
 		data-txt="{{ txt or '[notxt]' | e }}">
+		{% if doctype == "Sales Order" %}
+			<div class="row order-title align-center">
+				<div class="col-sm-3 font-weight-bold" style="color: black;">Order no.</div>
+				<div class="col-sm-2 font-weight-bold items-preview ellipsis ellipsis-width" style="color: black;">Status</div>
+				<div class="col-sm-5 font-weight-bold" style="color: black;">Product</div>
+				<div class="col-sm-2 font-weight-bold text-right" style="color: black;">Amount</div>
+			</div>
+		{% endif %}
 		<!-- {% if not hide_filters -%}
 			{% include "templates/includes/list/filters.html" %}
 		{%- endif %} -->
 		{% if result_heading_template %}{% include result_heading_template %}{% endif %}
 
-		<div class="result">
+		<div class="result {% if doctype == 'Sales Order' %}mt-0{% endif %}">
 			{% for item in result %}
 				{{ item }}
 			{% endfor %}

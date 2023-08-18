@@ -6,7 +6,7 @@
 {% macro main_content() %}
 <div class="page-content-wrapper">
 	
-	<div class="page-breadcrumbs {% if show_sidebar %}hidden-header{% else %}{% endif %}">
+	<div class="page-breadcrumbs {% if show_sidebar %}hidden-title{% else %}{% endif %}">
 		{% block breadcrumbs %}
 			{% include 'templates/includes/breadcrumbs.html' %}
 		{% endblock %}
@@ -15,7 +15,7 @@
 	{% block page_container %}
 	<main class="{% if not full_width %}container my-4{% endif %}">
 		<div class="d-flex justify-content-between align-items-center">
-			<div class="{% if show_sidebar %}hidden-header{% else %}{% endif %}" style="width: 100%;">
+			<div class="{% if show_sidebar %}hidden-title{% else %}{% endif %}" style="width: 100%;">
 				{% block header %}{% endblock %}
 			</div>
 
@@ -59,19 +59,15 @@ id="page-{{ name or route | e }}" data-path="{{ pathname | e }}"
 			<div class="breadcrumb-container container">
 				<nav class="container pl-0" aria-label="breadcrumb">
 					<ol class="breadcrumb pb-0" itemscope itemtype="http://schema.org/BreadcrumbList">
-						{%- set parents = parents[-3:] %}
-						{% set count = (parents | length) + 1 %}
-						{% for parent in parents %}
 							<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" class="breadcrumb-item">
 								<a itemprop="item" href="/" itemprop="url">
 									<span itemprop="name" class="ml-0">Home</span>
-									<meta itemprop="position" content="{{ loop.index }}" />
+									<meta itemprop="position" content="" />
 								</a>
 							</li>
-						{% endfor %}
 						<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" class="breadcrumb-item active" aria-current="page">
 							<span itemprop="item">
-								<span itemprop="name">{{ title }}</span>
+								<span itemprop="name">{% if title == "Orders" %}My Order{% elif title == "Me" %}My Profile{% else %}{{ title }}{% endif %}</span>
 								<meta itemprop="position" content="{{ count }}"/>
 							</span>
 						</li>
@@ -81,7 +77,7 @@ id="page-{{ name or route | e }}" data-path="{{ pathname | e }}"
 		</div>
 	</div>
 	<div class="titleBar">
-		<h2>{{ title }}</h2>
+		<h2>{% if title == "Orders" %}My Order{% elif title == "Me" %}My Profile{% else %}{{ title }}{% endif %}</h2>
 	</div>
 	<div class="row" {{ container_attributes() }}>
 		{%- set columns = sidebar_columns or 2 -%}
