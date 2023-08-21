@@ -4,7 +4,7 @@
 {% block content %}
 
 {% macro main_content() %}
-<div class="page-content-wrapper">
+<div class="page-content-wrapper mt-0 mb-0">
 	<!-- breadcrumbs -->
 	<div class="page-breadcrumbs {% if show_sidebar %}hidden-title{% else %}{% endif %}">
 		{% block breadcrumbs %}
@@ -15,8 +15,8 @@
 	{% block page_container %}
 	<main>
 		<div class="d-flex justify-content-between align-items-center">
-			<div class="page-header {% if show_sidebar %}hidden-title{% else %}{% endif %}">
-				{% block header %}{% endblock %}
+			<div class="page-header my-acount-title {% if show_sidebar %}hidden-title{% else %}{% endif %}">
+				 {% block header %}{% endblock %}
 			</div>
 
 			{% if self.header_actions() %}
@@ -45,60 +45,69 @@ id="page-{{ name or route | e }}" data-path="{{ pathname | e }}"
 {%- endmacro %}
 
 {% macro sidebar() %}
-<div class="sidebar-column col-sm-{{ columns }}">
+<div class="sidebar-column col-sm-12 col-md-12 col-lg-4 col-sm--{{ columns }}">
 	{% block page_sidebar %}
 	{% include "templates/includes/web_sidebar.html" %}
 	{% endblock %}
 </div>
 {% endmacro %}
 
-{% if show_sidebar %}
-<div class="container">
-	<div class="row">
-		<div class="col-sm-12">
-			<nav aria-label="breadcrumb" class="breadcrumb-ul">
-				<ul  itemscope itemtype="http://schema.org/BreadcrumbList">
-					<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" class="breadcrumb-item-">
-						<a itemprop="item" href="/" itemprop="url">
-							<span itemprop="name">Home</span>
-							<meta itemprop="position" />
-						</a>
-					</li>
-					<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" class="breadcrumb-item- active" aria-current="page">
-						<span itemprop="item">
-							<span itemprop="name">{% if title == "Orders" %}My Order{% elif title == "Me" %}My Profile{% else %}{{ title }}{% endif %}</span>
-							<meta itemprop="position" content="{{ count }}"/>
-						</span>
-					</li>
-				</nav>
-			</div>
-		</div>
-	<div class="row">
-		<div class="col-sm-12">
-			<div class="title-link-con titleBar mb-4">
-				<div class="row">
-					<div class="col-sm-6 col-md-6 col-lg-8 align-self-center">
-						<div class="title-link-col">
-							<h4 class="mb-sm-0">{% if title == "Orders" %}My Order{% elif title == "Me" %}My Profile{% else %}{{ title }}{% endif %}</h4>
+{% if show_sidebar %} 
+        <div class="container pl-0 pr-0">
+			<div class="container-fluid pl-0 pr-0 section-padding breadcrumb-con">
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-12">
+							<nav aria-label="breadcrumb" class="breadcrumb-ul">
+								<ul  itemscope itemtype="http://schema.org/BreadcrumbList">
+									<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" class="breadcrumb-item-">
+										<a itemprop="item" href="/" itemprop="url">
+											<span itemprop="name">Home</span>
+											<meta itemprop="position" />
+										</a>
+									</li>
+									<li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem" class="breadcrumb-item- active" aria-current="page">
+										<span itemprop="item">
+											<span itemprop="name">{% if title == "Orders" %}My Order{% elif title == "Me" %}My Profile{% else %}{{ title }}{% endif %}</span>
+											<meta itemprop="position" content="{{ count }}"/>
+										</span>
+									</li>
+							</nav>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	</div>
-	<div class="row" {{ container_attributes() }}>
-		{%- set columns = sidebar_columns or 2 -%}
-		{%- if not sidebar_right -%}
-		{{ sidebar() }}
-		{%- endif -%}
-		<div class="main-column col-sm-{{ 12 - columns }}">
-			{{ main_content() }}
-		</div>
-		{%- if sidebar_right -%}
-		{{ sidebar() }}
-		{%- endif -%}
-	</div>
-</div>
+			<div class="container-fluid pl-0 pr-0 section-padding pt-2">
+				<div class="container">
+					<div class="row">
+						<div class="col-sm-12">
+							<div class="title-link-con titleBar">
+								<div class="row">
+									<div class="col-sm-6 col-md-6 col-lg-8 align-self-center">
+										<div class="title-link-col">
+											<h4 class="mb-sm-0">{% if title == "Orders" %}My Order{% elif title == "Me" %}My Profile{% else %}{{ title }}{% endif %}</h4>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<hr class="line-light-color">
+					<div class="row" {{ container_attributes() }}>
+						{%- set columns = sidebar_columns or 2 -%}
+						{%- if not sidebar_right -%}
+						{{ sidebar() }}
+						{%- endif -%}
+						<div class="main-column acount-fixed-main-column col-sm-12 col-md-12 col-lg-8 col-sm--{{ 12 - columns }}">
+							{{ main_content() }}
+						</div>
+						{%- if sidebar_right -%}
+						{{ sidebar() }}
+						{%- endif -%}
+					</div>
+				</div>
+			</div>
+		</div> 
 {% else %}
 <div {{ container_attributes() }}>
 	{{ main_content() }}

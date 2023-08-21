@@ -42,6 +42,11 @@
 	</li>
 </ul>
 <hr>
+<ul class="list-unstyled">
+	<li class="sidebar-item">
+		<a href="javascript:void(0)">Log out</a>
+	</li>
+</ul>
 {% endif %}
 {% endmacro %}
 
@@ -50,15 +55,15 @@
 {% if frappe.user != 'Guest' %}
 <ul class="list-unstyled">
 	<li class="sidebar-item">
-		<h5>Hello {{ full_name }}</h5>
-		<p>{{ email }}</p>
+		<h6 class="mb-0">Hello {{ full_name }}</h6>
+		<p class="mb-0">{{ email }}</p>
 	</li>
 </ul>
 <hr>
 {% endif %}
 {% endmacro %}
 
-<div class="web-sidebar">
+<div class="web-sidebar acount-sidebar-ul	">
 	{% if sidebar_title %}
 	<li class="title">
 		{{ sidebar_title }}
