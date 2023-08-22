@@ -36,7 +36,9 @@
 			<span toggle="#login_password" class="toggle-password text-muted">{{ _('Show') }}</span>
 		</div>
 	</div>
-
+	<p>
+		<label> Don't have an account?  <a href="javascript:void(0)" class="secondary-color" id="signUpLink" data-toggle="modal" data-target="#signUpModal" data-dismiss="modal"> Sign Up </a></label>
+	</p>
 	<p class="forgot-password-message">
 		<a href="#forgot">{{ _("Forgot Password?") }}</a></p>
 </div>
@@ -59,7 +61,8 @@
 {% macro logo_section() %}
 <div class="page-card-head">
 	<img class="app-logo" src="{{ logo }}">
-	<h4>{{ _('Login to {0}').format(app_name or _("Frappe")) }}</h4>
+	<!-- <h4>{{ _('Login to {0}').format(app_name or _("Frappe")) }}</h4> -->
+	<h4>{{ _('Login') }}</h4>
 </div>
 {% endmacro %}
 
