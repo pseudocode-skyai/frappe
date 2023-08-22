@@ -26,7 +26,7 @@
 		</ul>
 	</div>
 </div> -->
-{% set user_image, full_name, email, username, user_type, company_name, tax_id, contact_person_name, cell_phone_no, tobacco_lic, office_address_line_1, tobacco_lic_attach, tax_id_attach = frappe.db.get_value("User", frappe.session.user, ["user_image","full_name","email", "username", "user_type","company_name","tax_id","contact_person_name","cell_phone_no","tobacco_lic","office_address_line_1","tobacco_lic_attach","tax_id_attach"]) %}
+{% set user_image, full_name, email, username, user_type, company_name, tax_id, contact_person_name, cell_phone_no, tobacco_lic, office_address, tobacco_lic_attach, tax_id_attach = frappe.db.get_value("User", frappe.session.user, ["user_image","full_name","email", "username", "user_type","company_name","tax_id","contact_person_name","cell_phone_no","tobacco_lic","office_address","tobacco_lic_upload_file","tax_idupload_file"]) %}
 <div class="container profile">
 	<div class="row">
 		<div class="col-lg-1 col-md-2 col-sm-12 pro-img">
@@ -177,7 +177,7 @@
 						</div>
 						<div class="col-sm-6 profile-inpt">
 							<p>
-								<b>{{ office_address_line_1 }}</b>
+								<b>{{ office_address }}</b>
 							</p>
 						</div>
 					</div>
