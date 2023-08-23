@@ -221,7 +221,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nClosed\nLead Transfer\nTravel Form To Be Check\nTravel Form To Be Approved\nTravel Form Approved"
+   "options": "Open\nClosed\nLead Transfer\nTravel Form To Be Check\nTravel Form To Be Approved\nTravel Form Approved\nTravel Form Reject\nTravel Form Return\nTravel Form Cancel the Request"
   },
   {
    "collapsible": 1,
@@ -276,7 +276,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2023-08-16 13:16:42.545158",
+ "modified": "2023-08-22 16:34:02.052105",
  "modified_by": "Administrator",
  "module": "Desk",
  "name": "Event",
