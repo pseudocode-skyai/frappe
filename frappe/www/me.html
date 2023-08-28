@@ -27,158 +27,163 @@
 	</div>
 </div> -->
 {% set user_image, full_name, email, username, user_type, company_name, tax_id, contact_person_name, cell_phone_no, tobacco_lic, office_address, tobacco_lic_attach, tax_id_attach = frappe.db.get_value("User", frappe.session.user, ["user_image","full_name","email", "username", "user_type","company_name","tax_id","contact_person_name","cell_phone_no","tobacco_lic","office_address","tobacco_lic_upload_file","tax_idupload_file"]) %}
-<div class="container profile">
+<div class="profile">
 	<div class="row">
-		<div class="col-lg-1 col-md-2 col-sm-12 pro-img">
-			<img src="{{ user_image }}" alt="" >
+		<div class="col-sm-12 ">
+			<div class="inner-div">
+				<div class="img-div">
+					<span class="pro-img">
+						<img src="{{ user_image }}" alt="">
+					</span>
+				</div>
+				<div class="header-txt">
+					<p class="head-name">
+						<b>{{ company_name }}</b>
+					</p>
+						<p class="head-num">
+							<a href="telto: +91 {{ cell_phone_no }}" target="_blank" style="text-decoration: none;color: #000000;">
+								+91 {{ cell_phone_no }}
+							</a>
+						</p>
+					<p class="head-email;">
+						<a href="mailto: {{ email }}" target="_blank" style="text-decoration: none;color: #000000;">
+							{{ email }}
+						</a>
+					</p>
+					<a href="/update-profile?name={{ user }}" class="edit-btn-pro">Edit</a>
+				</div>
+			</div>
 		</div>
-		<div class="col-lg-9 col-md-6 col-sm-12 pro-txt">
-			<p style="margin: 0; font-size: 18px; font-weight: 700;">
-				<b>{{ company_name }}</b>
-			</p>
-			<p style="margin: 0; font-size: 13px; font-weight: 400; ">
-				<a href="telto: +91 {{ cell_phone_no }}" target="_blank" style="text-decoration: none;color: #000000;">
-					+91 {{ cell_phone_no }}
-				</a>
-			</p>
-			<p style="margin: 0; font-size: 14px; font-weight: 400; ">
-				<a href="mailto: {{ email }}" target="_blank" style="text-decoration: none;color: #000000;">
-					{{ email }}
-				</a>
-			</p>
-		</div>
-		<div class="col-lg-2 col-md-3 col-sm-12 edit-btn">
-			<a	href="/update-profile?name={{ user }}">
-				Edit
-			</a>
-		</div>
-	</div>
-	<div class="pro-main">
-		<div class="row profile-con" >
-			<div class="col-sm-12 ">
-				<div class="profile-col">
-					<div class="row">
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								Name
-							</p>
-						</div>
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								<b>{{ full_name }}</b>
-							</p>
+		<div class="col-sm-12">
+			<div class="full-div">
+				<div class="none-div">
+					&nbsp;
+				</div>
+				<div class="header-txt-2">
+					<div class="profile-col">
+						<div class="row">
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									Name
+								</p>
+							</div>
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									<b>{{ full_name }}</b>
+								</p>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="profile-col">
-					<div class="row">
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								Enter company name
-							</p>
-						</div>
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								<b>{{ company_name }}</b>
-							</p>
-						</div>
-					</div>
-				</div>
-				<div class="profile-col">
-					<div class="row">
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								Enter your tax ID
-							</p>
-						</div>
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								<b>{{ tax_id }}</b>
-							</p>
+					<div class="profile-col">
+						<div class="row">
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									Enter company name
+								</p>
+							</div>
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									<b>{{ company_name }}</b>
+								</p>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="profile-col">
-					<div class="row">
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								Tax ID File
-							</p>
-						</div>
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								<b>{{ tax_id_attach }}</b>
-							</p>
-						</div>
-					</div>
-				</div>
-				<div class="profile-col">
-					<div class="row">
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								Enter contact person name
-							</p>
-						</div>
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								<b>{{ contact_person_name }}</b>
-							</p>
+					<div class="profile-col">
+						<div class="row">
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									Enter your tax ID
+								</p>
+							</div>
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									<b>{{ tax_id }}</b>
+								</p>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="profile-col">
-					<div class="row">
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								Enter cell phone no
-							</p>
-						</div>
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								<b>{{ cell_phone_no }}</b>
-							</p>
-						</div>
-					</div>
-				</div>
-				<div class="profile-col">
-					<div class="row">
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								Enter tobacco Lic
-							</p>
-						</div>
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								<b>{{ tobacco_lic }}</b>
-							</p>
+					<div class="profile-col">
+						<div class="row">
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									Tax ID File
+								</p>
+							</div>
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									<b>{{ tax_id_attach }}</b>
+								</p>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="profile-col">
-					<div class="row">
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								Tobacco Lic File
-							</p>
-						</div>
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								<b>{{ tobacco_lic_attach }}</b>
-							</p>
+					<div class="profile-col">
+						<div class="row">
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									Enter contact person name
+								</p>
+							</div>
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									<b>{{ contact_person_name }}</b>
+								</p>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="profile-col">
-					<div class="row">
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								Office address
-							</p>
+					<div class="profile-col">
+						<div class="row">
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									Enter cell phone no
+								</p>
+							</div>
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									<b>{{ cell_phone_no }}</b>
+								</p>
+							</div>
 						</div>
-						<div class="col-sm-6 profile-inpt">
-							<p>
-								<b>{{ office_address }}</b>
-							</p>
+					</div>
+					<div class="profile-col">
+						<div class="row">
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									Enter tobacco Lic
+								</p>
+							</div>
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									<b>{{ tobacco_lic }}</b>
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="profile-col">
+						<div class="row">
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									Tobacco Lic File
+								</p>
+							</div>
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									<b>{{ tobacco_lic_attach }}</b>
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="profile-col">
+						<div class="row">
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									Office address
+								</p>
+							</div>
+							<div class="col-sm-6 profile-inpt">
+								<p>
+									<b>{{ office_address }}</b>
+								</p>
+							</div>
 						</div>
 					</div>
 				</div>
