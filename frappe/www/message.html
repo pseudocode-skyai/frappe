@@ -28,8 +28,12 @@ html, body {
 	{% block message_body %}
 		<p>{{ message or "" }}</p>
 		{% if primary_action %}
-		<div><a href='{{ primary_action or "/" }}' class='btn btn-primary btn-sm'>
-			{{ primary_label or _("Home") }}</a></div>
+			{% if "/" %}
+			<a href='{{ primary_action or "/" }}' id='homeLink'></a>
+			{% else %}
+				<div><a href='{{ primary_action or "/" }}' class='btn btn-primary btn-sm'>
+					{{ primary_label or _("Home") }}</a></div>
+			{% endif %}
 		{% endif %}
 	{% endblock %}
 	</div>
@@ -45,5 +49,18 @@ html, body {
 
 		$('.btn-primary').focus();
 	});
+</script>
+<script>
+    // Get the anchor element by its ID
+    var homeLink = document.getElementById('homeLink');
+
+    // Check if the href attribute is empty or "/"
+    if (!homeLink.getAttribute('href') || homeLink.getAttribute('href') === '/') {
+        // Set a timeout of 2000 milliseconds (2 seconds)
+        setTimeout(function () {
+            // Redirect to the home page after the timeout
+            window.location.href = '/';
+        }, 3000); // Adjust the delay time as needed (in milliseconds)
+    }
 </script>
 {% endblock %}
