@@ -28,7 +28,7 @@ html, body {
 	{% block message_body %}
 		<p>{{ message or "" }}</p>
 		{% if primary_action %}
-			{% if "/" %}
+			{% if primary_action == "/" %}
 			<a href='{{ primary_action or "/" }}' id='homeLink'></a>
 			{% else %}
 				<div><a href='{{ primary_action or "/" }}' class='btn btn-primary btn-sm'>
