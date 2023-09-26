@@ -11,7 +11,7 @@
 .grid-heading-row {
 	border-bottom: 1px solid var(--table-border-color);
 	color: var(--text-muted);
-	font-size: var(--text-md);
+	font-size: var(--text-lg);
 }
 
 .rows .grid-row .data-row,
@@ -63,7 +63,7 @@
 }
 
 .grid-body .data-row {
-	font-size: $font-size-sm;
+	font-size: $font-size-base;
 }
 
 .grid-empty,
