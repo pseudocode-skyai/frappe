@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "address_details",
+  "search_address",
   "address_title",
   "address_type",
   "address_line1",
@@ -107,7 +108,8 @@
   {
    "fieldname": "phone",
    "fieldtype": "Data",
-   "label": "Phone"
+   "label": "Phone",
+   "options": "Phone"
   },
   {
    "fieldname": "fax",
@@ -143,12 +145,18 @@
    "fieldtype": "Table",
    "label": "Links",
    "options": "Dynamic Link"
+  },
+  {
+   "fieldname": "search_address",
+   "fieldtype": "HTML",
+   "label": "Search Address",
+   "options": "<input class=\"input-with-feedback form-control\" id=\"search-address\" type=\"text\">"
   }
  ],
  "icon": "fa fa-map-marker",
  "idx": 5,
  "links": [],
- "modified": "2020-10-21 16:14:37.284830",
+ "modified": "2023-12-13 01:44:47.292932",
  "modified_by": "Administrator",
  "module": "Contacts",
  "name": "Address",

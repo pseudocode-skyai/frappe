@@ -103,7 +103,7 @@ def validate_phone_number(phone_number, throw=False):
 		return False
 
 	phone_number = phone_number.strip()
-	match = re.match(r"([0-9\ \+\_\-\,\.\*\#\(\)]){1,20}$", phone_number)
+	match = re.match(r"^[0-9]{10}$", phone_number)
 
 	if not match and throw:
 		frappe.throw(

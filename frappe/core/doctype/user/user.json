@@ -114,6 +114,7 @@
    "label": "First Name",
    "oldfieldname": "first_name",
    "oldfieldtype": "Data",
+   "options": "Name",
    "reqd": 1
   },
   {
@@ -121,7 +122,8 @@
    "fieldtype": "Data",
    "label": "Middle Name",
    "oldfieldname": "middle_name",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "options": "Name"
   },
   {
    "bold": 1,
@@ -129,7 +131,8 @@
    "fieldtype": "Data",
    "label": "Last Name",
    "oldfieldname": "last_name",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "options": "Name"
   },
   {
    "fieldname": "full_name",
@@ -668,7 +671,7 @@
    "link_fieldname": "user"
   }
  ],
- "modified": "2022-09-19 16:10:56.745069",
+ "modified": "2023-12-13 01:44:11.460820",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "User",
@@ -701,7 +704,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "title_field": "full_name",
  "track_changes": 1
 }
