@@ -25,6 +25,8 @@ data-web-form="{{ name }}" data-web-form-doctype="{{ doc_type }}" data-login-req
 {% endmacro %}
 
 {% block page_content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD4p6Bs5s5evYfmQLbg8XaoD3bexCCN-6Q&libraries=places&v=weekly"></script>
 <div>
 	{% if is_list %}
 	{# web form list #}
@@ -38,7 +40,23 @@ data-web-form="{{ name }}" data-web-form-doctype="{{ doc_type }}" data-login-req
 	<div role="form">
 		<div id="introduction" class="text-muted"></div>
 		<hr>
-		<div class="web-form-wrapper" {{ container_attributes() }}></div>
+		<div class="web-form-wrapper" {{ container_attributes() }}>
+			{% if title == "Address" %}
+			<div class="frappe-control">
+				<div class="form-group">
+					<div class="clearfix">
+						<label class="control-label reqd" style="padding-right: 0px;">Search Address</label>
+					</div>
+					<div class="control-input-wrapper">
+						<div class="control-input">
+							<input type="text" id="google-search-address" class="input-with-feedback form-control" placeholder="" autocomplete="off" required>
+						</div>
+					</div>
+					<p style="font-size: 15px;color: red;">Search and Select here for add Address.</p>
+				</div>
+			</div>
+			{% endif %}
+		</div>
 		<div class="web-form-footer pull-right"></div>
 	</div>
 
@@ -139,4 +157,71 @@ frappe.init_client_script = () => {
 	{{ custom_css }}
 {% endif %}
 </style>
+
+<!-- Include this script in your Frappe web form -->
+<script>
+    const disallowedStates = ["Alabama", "Arkansas", "Indiana", "Vermont", "Wisconsin", "Rhode Island"];
+    const disallowedCities = ["Sarasota County Florida", "San Diego", "Jerseyville", "Denver"];
+
+    function initializeAutocomplete() {
+        const searchAddressInput = document.getElementById('google-search-address');
+
+        if (searchAddressInput) {
+            const autocomplete = new google.maps.places.Autocomplete(searchAddressInput, {
+                types: ['geocode'],
+                componentRestrictions: { country: 'US' }
+            });
+
+            autocomplete.addListener('place_changed', function () {
+                const place = autocomplete.getPlace();
+
+                let defaultStreet = '';
+                let defaultCity = '';
+                let defaultState = '';
+                let defaultCountry = '';
+                let defaultPostalcode = '';
+
+                // Check if the selected place's state and city are not in the disallowed lists
+                const cityComponent = place.address_components.find(component => component.types.includes('locality'));
+                const stateComponent = place.address_components.find(component => component.types.includes('administrative_area_level_1'));
+
+                if (cityComponent && stateComponent &&
+                    !disallowedCities.includes(cityComponent.long_name) &&
+                    !disallowedStates.includes(stateComponent.long_name)) {
+                    // The selected place's city and state are not in the disallowed lists
+
+                    // Loop through the address components to extract street, city, and state
+                    place.address_components.forEach((component) => {
+                        const types = component.types;
+                        if (types.includes('route')) {
+                            defaultStreet = component.long_name;
+                        } else if (types.includes('locality')) {
+                            defaultCity = component.long_name;
+                        } else if (types.includes('administrative_area_level_1')) {
+                            defaultState = component.long_name;
+                        } else if (types.includes('country')) {
+                            defaultCountry = component.long_name;
+                        } else if (types.includes('postal_code')) {
+                            defaultPostalcode = component.long_name;
+                        }
+                    });
+
+                    // Set values in your Frappe form fields
+					frappe.web_form.set_value('address_title', place.name)
+                    frappe.web_form.set_value('address_line1', defaultStreet);
+                    frappe.web_form.set_value('city', defaultCity);
+                    frappe.web_form.set_value('state', defaultState);
+                    frappe.web_form.set_value('country', defaultCountry);
+                    frappe.web_form.set_value('pincode', defaultPostalcode);
+                } else {
+					frappe.msgprint("Entered city or state is not allowed.")
+					// window.location.reload();
+				}
+            });
+        }
+    }
+
+    window.onload = initializeAutocomplete;
+</script>
+
 {% endblock %}
