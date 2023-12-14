@@ -260,8 +260,11 @@ export default class WebFormList {
 
 	toggle_delete() {
 		if (!this.settings.allow_delete) return
+		let new_btn = document.getElementById("new")
 		let btn = document.getElementById("delete-rows");
 		btn.disabled = !this.get_selected().length;
+		new_btn.hidden = this.get_selected().length;
+
 		// btn.hidden = false;
 	}
 
