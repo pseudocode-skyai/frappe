@@ -233,7 +233,7 @@ export default class WebFormList {
 
 		button.id = id;
 		button.innerText = name;
-		button.hidden = hidden;
+		// button.hidden = hidden;
 
 		button.onclick = action;
 		wrapper.appendChild(button);
@@ -261,7 +261,8 @@ export default class WebFormList {
 	toggle_delete() {
 		if (!this.settings.allow_delete) return
 		let btn = document.getElementById("delete-rows");
-		btn.hidden = !this.get_selected().length;
+		btn.disabled = !this.get_selected().length;
+		// btn.hidden = false;
 	}
 
 	delete_rows() {
