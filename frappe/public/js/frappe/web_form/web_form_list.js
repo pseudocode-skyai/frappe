@@ -263,9 +263,10 @@ export default class WebFormList {
 		let new_btn = document.getElementById("new")
 		let btn = document.getElementById("delete-rows");
 		btn.disabled = !this.get_selected().length;
-		new_btn.hidden = this.get_selected().length;
+		new_btn.disabled = this.get_selected().length;
 
 		// btn.hidden = false;
+		return !btn.disabled;
 	}
 
 	delete_rows() {
@@ -281,8 +282,11 @@ export default class WebFormList {
 				}
 			})
 			.then(() => {
-				this.refresh()
-				this.toggle_delete()
+				const isDeleteToggled = this.toggle_delete();
+
+				if (isDeleteToggled) {
+					this.refresh();
+				}
 			});
 	}
 };
