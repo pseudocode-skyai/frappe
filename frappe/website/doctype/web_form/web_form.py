@@ -531,20 +531,37 @@ def delete(web_form_name, docname):
 def delete_multiple(web_form_name, docnames):
 	web_form = frappe.get_doc("Web Form", web_form_name)
 
-	docnames = json.loads(docnames)
+	# for multiple address delete
+	# docnames = json.loads(docnames)
+
+	# for single address delete
+	docname = docnames
 
 	allowed_docnames = []
 	restricted_docnames = []
 
-	for docname in docnames:
-		owner = frappe.db.get_value(web_form.doc_type, docname, "owner")
-		if frappe.session.user == owner and web_form.allow_delete:
-			allowed_docnames.append(docname)
-		else:
-			restricted_docnames.append(docname)
+	# for multiple address delete
+	# for docname in docnames:
+	# 	owner = frappe.db.get_value(web_form.doc_type, docname, "owner")
+	# 	if frappe.session.user == owner and web_form.allow_delete:
+	# 		allowed_docnames.append(docname)
+	# 	else:
+	# 		restricted_docnames.append(docname)
+	
 
-	for docname in allowed_docnames:
-		frappe.delete_doc(web_form.doc_type, docname, ignore_permissions=True)
+	# for single address delete
+	owner = frappe.db.get_value(web_form.doc_type, docname, "owner")
+	if frappe.session.user == owner and web_form.allow_delete:
+		allowed_docnames.append(docname)
+	else:
+		restricted_docnames.append(docname)
+
+	# for multiple address delete
+	# for docname in allowed_docnames:
+	# 	frappe.delete_doc(web_form.doc_type, docname, ignore_permissions=True)
+	
+	# for single address delete
+	frappe.delete_doc(web_form.doc_type, docname, ignore_permissions=True)
 
 	if restricted_docnames:
 		raise frappe.PermissionError(

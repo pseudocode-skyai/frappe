@@ -159,6 +159,14 @@ frappe.init_client_script = () => {
 
 <!-- Include this script in your Frappe web form -->
 <script>
+	function blankFields() {
+		frappe.web_form.set_value('address_title', "")
+        frappe.web_form.set_value('address_line1', "");
+        frappe.web_form.set_value('city', "");
+        frappe.web_form.set_value('state', "");
+        frappe.web_form.set_value('pincode', "");
+	}
+
     const disallowedStates = ["Alabama", "Arkansas", "Indiana", "Vermont", "Wisconsin", "Rhode Island"];
     const disallowedCities = ["Sarasota County Florida", "San Diego", "Jerseyville", "Denver"];
 
@@ -178,6 +186,7 @@ frappe.init_client_script = () => {
 
 				if (!place || !place.geometry || !place.address_components) {
 					frappe.msgprint("No address found. Please enter a valid address.");
+					blankFields();
 					return;
 				}
 
@@ -221,6 +230,7 @@ frappe.init_client_script = () => {
                     frappe.web_form.set_value('pincode', defaultPostalcode);
                 } else {
 					frappe.msgprint("Entered city or state is not allowed.")
+					blankFields();
 					// window.location.reload();
 				}
             });

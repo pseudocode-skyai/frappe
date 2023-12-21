@@ -142,29 +142,35 @@ export default class WebFormList {
 		thead.style.backgroundColor = "#f7fafc";
 		thead.style.color = "#8d99a6";
 		let row = thead.insertRow();
-
-		let th = document.createElement("th");
-
-		let checkbox = document.createElement("input");
-		checkbox.type = "checkbox";
-		checkbox.id = "select-all";
-		checkbox.onclick = event =>
-			this.toggle_select_all(event.target.checked);
-
-		th.appendChild(checkbox);
-		row.appendChild(th);
-
+	
 		add_heading(row, __("Sr"));
 		this.columns.forEach(col => {
 			add_heading(row, __(col.label));
 		});
-
+	
+		// Add button in the last column
+		add_edit_heading(row, "Edit");
+		add_delete_heading(row, "Delete");
+	
 		function add_heading(row, label) {
 			let th = document.createElement("th");
 			th.innerText = label;
 			row.appendChild(th);
 		}
+	
+		function add_edit_heading(row, label) {
+			let th = document.createElement("th");
+			th.innerText = label;
+			row.appendChild(th);
+		}
+
+		function add_delete_heading(row, label) {
+			let th = document.createElement("th");
+			th.innerText = label;
+			row.appendChild(th);
+		}
 	}
+	
 
 	append_rows(row_data) {
 		const tbody = this.table.childNodes[1] || this.table.createTBody();
@@ -177,11 +183,37 @@ export default class WebFormList {
 				doc: data_item,
 				columns: this.columns,
 				serial_number: this.rows.length + 1,
-				events: {
-					onEdit: () => this.open_form(data_item.name),
-					onSelect: () => this.toggle_delete()
-				}
+				// events: {
+				// 	onEdit: () => this.open_form(data_item.name),
+				// 	onSelect: () => this.toggle_delete()
+				// }
 			});
+
+			// Add Edit button
+			let editCell = row_element.insertCell();
+			let editButton = document.createElement("button");
+			editButton.innerText = "Edit";
+			editButton.classList.add(
+				"btn",
+				"btn-primary",
+				"btn-sm",
+				"ml-2"
+			);
+			editButton.onclick = () => this.open_form(data_item.name);
+			editCell.appendChild(editButton);
+
+			// Add Delete button
+			let deleteCell = row_element.insertCell();
+			let deleteButton = document.createElement("button");
+			deleteButton.innerText = "Delete";
+			deleteButton.classList.add(
+				"btn",
+				"btn-primary",
+				"btn-sm",
+				"ml-2"
+			);
+			deleteButton.onclick = () => this.delete_row(data_item.name);
+			deleteCell.appendChild(deleteButton);
 
 			this.rows.push(row);
 		});
@@ -233,7 +265,7 @@ export default class WebFormList {
 
 		button.id = id;
 		button.innerText = name;
-		// button.hidden = hidden;
+		button.hidden = hidden;
 
 		button.onclick = action;
 		wrapper.appendChild(button);
@@ -246,29 +278,49 @@ export default class WebFormList {
 		}
 	}
 
-	toggle_select_all(checked) {
-		this.rows.forEach(row => row.toggle_select(checked));
-	}
+	// toggle_select_all(checked) {
+	// 	this.rows.forEach(row => row.toggle_select(checked));
+	// }
 
 	open_form(name) {
 		window.location.href = window.location.pathname + "?name=" + name;
 	}
 
-	get_selected() {
-		return this.rows.filter(row => row.is_selected());
-	}
+	// get_selected() {
+	// 	return this.rows.filter(row => row.is_selected());
+	// }
 
-	toggle_delete() {
+	// toggle_delete() {
+	// 	if (!this.settings.allow_delete) return
+	// 	let new_btn = document.getElementById("new")
+	// 	// let btn = document.getElementById("delete-rows");
+	// 	// btn.disabled = !this.get_selected().length;
+	// 	new_btn.disabled = this.get_selected().length;
+
+	// 	// btn.hidden = false;
+	// 	return !btn.disabled;
+	// }
+
+	// for single delete
+	delete_row(name) {
 		if (!this.settings.allow_delete) return
-		let new_btn = document.getElementById("new")
-		let btn = document.getElementById("delete-rows");
-		btn.disabled = !this.get_selected().length;
-		new_btn.disabled = this.get_selected().length;
-
-		// btn.hidden = false;
-		return !btn.disabled;
+		frappe
+			.call({
+				type: "POST",
+				method: "frappe.website.doctype.web_form.web_form.delete_multiple",
+				args: {
+					web_form_name: this.web_form_name,
+					docnames: name
+				}
+			})
+			.then(() => {
+				console.log("Delete successful. Calling refresh.");
+				// this.refresh();
+				window.location.reload();
+			});
 	}
 
+	// for multiple deletes
 	delete_rows() {
 		if (!this.settings.allow_delete) return
 		frappe
@@ -299,16 +351,16 @@ frappe.ui.WebFormListRow = class WebFormListRow {
 
 	make_row() {
 		// Add Checkboxes
-		let cell = this.row.insertCell();
+		// let cell = this.row.insertCell();
 
-		this.checkbox = document.createElement("input");
-		this.checkbox.type = "checkbox";
-		this.checkbox.onclick = event => {
-			this.toggle_select(event.target.checked);
-			event.stopImmediatePropagation();
-		}
+		// this.checkbox = document.createElement("input");
+		// this.checkbox.type = "checkbox";
+		// this.checkbox.onclick = event => {
+		// 	this.toggle_select(event.target.checked);
+		// 	event.stopImmediatePropagation();
+		// }
 
-		cell.appendChild(this.checkbox);
+		// cell.appendChild(this.checkbox);
 
 		// Add Serial Number
 		let serialNo = this.row.insertCell();
@@ -325,12 +377,12 @@ frappe.ui.WebFormListRow = class WebFormListRow {
 		this.row.style.cursor = "pointer";
 	}
 
-	toggle_select(checked) {
-		this.checkbox.checked = checked;
-		this.events.onSelect(checked);
-	}
+	// toggle_select(checked) {
+	// 	this.checkbox.checked = checked;
+	// 	this.events.onSelect(checked);
+	// }
 
-	is_selected() {
-		return this.checkbox.checked;
-	}
+	// is_selected() {
+	// 	return this.checkbox.checked;
+	// }
 };
