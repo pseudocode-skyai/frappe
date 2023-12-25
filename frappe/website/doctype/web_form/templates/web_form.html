@@ -184,8 +184,8 @@ frappe.init_client_script = () => {
 
 				console.log(place);
 
-				if (!place || !place.geometry || !place.address_components) {
-					frappe.msgprint("No address found. Please enter a valid address.");
+				if (!isValidPlace(place)) {
+					frappe.msgprint("No valid address found. Please enter a valid address.");
 					blankFields();
 					return;
 				}
@@ -200,12 +200,10 @@ frappe.init_client_script = () => {
                 const cityComponent = place.address_components.find(component => component.types.includes('locality'));
                 const stateComponent = place.address_components.find(component => component.types.includes('administrative_area_level_1'));
 
-                if (cityComponent && stateComponent &&
-                    !disallowedCities.includes(cityComponent.long_name) &&
-                    !disallowedStates.includes(stateComponent.long_name)) {
+                if (cityComponent && stateComponent && !disallowedCities.includes(cityComponent.long_name) && !disallowedStates.includes(stateComponent.long_name)) {
                     // The selected place's city and state are not in the disallowed lists
-
                     // Loop through the address components to extract street, city, and state
+
                     place.address_components.forEach((component) => {
                         const types = component.types;
                         if (types.includes('route')) {
@@ -222,20 +220,26 @@ frappe.init_client_script = () => {
                     });
 
                     // Set values in your Frappe form fields
+
 					frappe.web_form.set_value('address_title', place.name)
                     frappe.web_form.set_value('address_line1', defaultStreet);
                     frappe.web_form.set_value('city', defaultCity);
                     frappe.web_form.set_value('state', defaultState);
                     // frappe.web_form.set_value('country', defaultCountry);
                     frappe.web_form.set_value('pincode', defaultPostalcode);
+
+					autocomplete.set('place', null);
                 } else {
 					frappe.msgprint("Entered city or state is not allowed.")
 					blankFields();
-					// window.location.reload();
 				}
             });
         }
     }
+
+	function isValidPlace(place) {
+		return place && place.geometry && place.address_components && place.address_components.length > 0;
+	}
 
     window.onload = initializeAutocomplete;
 </script>
