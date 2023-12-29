@@ -33,7 +33,13 @@
             <div class="title-editicon-box">
                 <div class="user-img-name-con"> 
                     <div class="user-img-name-img">
-                        <span class="user-img-name-img-cir"><img src="{{ user_image }}"/></span>
+                        <span class="user-img-name-img-cir">
+                        {% if user_image == None %}
+                            <img src="/assets/herbiary_customapp/images/user-black.png" style="width: 18px;height: 20px;"/>
+                        {% else %}
+                            <img src="{{ user_image }}"/>
+                        {% endif %}
+                        </span>
                     </div>
                     <div class="user-img-name-title">{{ full_name }}</div>
                 </div>
