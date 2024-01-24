@@ -37,12 +37,22 @@ class Address(Document):
 				)
 		else:
 			throw(_("Address Title is mandatory."))
+	
+	def rename(self):
+		if self.name and self.name != self.address_title:
+			oldname = self.name
+			frappe.db.set_value("Address", oldname, "address_title", self.address_title)
+			frappe.rename_doc(
+				"Address", oldname, self.address_title, force=True, show_alert=False
+			)
 
 	def validate(self):
 		self.link_address()
 		self.validate_preferred_address()
 		set_link_title(self)
 		deduplicate_dynamic_links(self)
+		if self.name:
+			self.rename()
 
 	def link_address(self):
 		"""Link address based on owner"""

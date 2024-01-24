@@ -39,11 +39,11 @@ data-web-form="{{ name }}" data-web-form-doctype="{{ doc_type }}" data-login-req
 		<div id="introduction" class="text-muted"></div>
 		<hr>
 		<div class="web-form-wrapper" {{ container_attributes() }}>
-			{% if title == "Address" %}
+			{% if title == "Address" or allow_edit == 1 %}
 			<div class="frappe-control">
 				<div class="form-group">
 					<div class="clearfix">
-						<label class="control-label reqd" style="padding-right: 0px;">Search Address</label>
+						<label class="control-label reqd" style="padding-right: 0px;">Search and Select Address</label>
 					</div>
 					<div class="control-input-wrapper">
 						<div class="control-input" style="display: flex;">
@@ -160,8 +160,8 @@ frappe.init_client_script = () => {
 <!-- Include this script in your Frappe web form -->
 <script>
 	function blankFields() {
-		frappe.web_form.set_value('address_title', "")
-        frappe.web_form.set_value('address_line1', "");
+		frappe.web_form.set_value('address_line1', "");
+        frappe.web_form.set_value('address_line2', "");
         frappe.web_form.set_value('city', "");
         frappe.web_form.set_value('state', "");
         frappe.web_form.set_value('pincode', "");
@@ -221,8 +221,8 @@ frappe.init_client_script = () => {
 
                     // Set values in your Frappe form fields
 
-					frappe.web_form.set_value('address_title', place.name)
-                    frappe.web_form.set_value('address_line1', defaultStreet);
+					frappe.web_form.set_value('address_line1', place.name);
+                    frappe.web_form.set_value('address_line2', defaultStreet);
                     frappe.web_form.set_value('city', defaultCity);
                     frappe.web_form.set_value('state', defaultState);
                     // frappe.web_form.set_value('country', defaultCountry);
