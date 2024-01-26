@@ -159,89 +159,139 @@ frappe.init_client_script = () => {
 
 <!-- Include this script in your Frappe web form -->
 <script>
-	function blankFields() {
-		frappe.web_form.set_value('address_line1', "");
-        frappe.web_form.set_value('address_line2', "");
-        frappe.web_form.set_value('city', "");
-        frappe.web_form.set_value('state', "");
-        frappe.web_form.set_value('pincode', "");
-	}
+    // Initialize Autocomplete when the window loads
+    window.onload = initializeAutocomplete;
 
     const disallowedStates = ["Alabama", "Arkansas", "Indiana", "Vermont", "Wisconsin", "Rhode Island"];
     const disallowedCities = ["Sarasota County Florida", "San Diego", "Jerseyville", "Denver"];
 
+    // Function to initialize Google Places Autocomplete
     function initializeAutocomplete() {
         const searchAddressInput = document.getElementById('google-search-address');
+        const autocompleteService = new google.maps.places.AutocompleteService();
+        const autocomplete = new google.maps.places.Autocomplete(searchAddressInput, {
+            types: ['geocode'],
+            componentRestrictions: { country: 'US' }
+        });
 
         if (searchAddressInput) {
-            const autocomplete = new google.maps.places.Autocomplete(searchAddressInput, {
-                types: ['geocode'],
-                componentRestrictions: { country: 'US' }
+
+            // Add event listener for input changes
+            searchAddressInput.addEventListener('input', function () {
+                const inputText = this.value;
+
+                // Define the autocomplete request
+                const autocompleteRequest = {
+                    input: inputText,
+                    types: ['geocode'], // Specify the types of predictions you want (e.g., 'geocode' for addresses)
+                    componentRestrictions: { country: 'US' } // Restrict predictions to a specific country
+                };
+
+                // Define the callback function to handle the predictions
+                const autocompleteCallback = function (predictions, status) {
+                    if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+                        // Handle the predictions (e.g., update a suggestion dropdown)
+                        handleAutocompletePredictions(predictions);
+                    } else {
+                        // Handle errors or no predictions
+                        console.error('Autocomplete request failed:', status);
+                    }
+                };
+                
+                // Make the autocomplete request
+                autocompleteService.getPlacePredictions(autocompleteRequest, autocompleteCallback);
             });
+            const place = autocomplete.getPlace();
+            console.log(place)
+        }
 
-            $('#search-btn').click(() => {
-                const place = autocomplete.getPlace();
+        // Add click event handler for the "Add" button
+        const addButton = document.getElementById('search-btn');
+        if (addButton) {
+            addButton.addEventListener('click', function () {
+                const inputText = searchAddressInput.value;
 
-				console.log(place);
+                // Define the autocomplete request
+                const autocompleteRequest = {
+                    input: inputText,
+                    types: ['geocode'],
+                    componentRestrictions: { country: 'US' }
+                };
 
-				if (!isValidPlace(place)) {
-					frappe.msgprint("No valid address found. Please enter a valid address.");
-					blankFields();
-					return;
-				}
+                // Make the autocomplete request
+                autocompleteService.getPlacePredictions(autocompleteRequest, function (predictions, status) {
+                    if (status === google.maps.places.PlacesServiceStatus.OK && predictions && predictions.length > 0) {
+                        // Use the first prediction to fetch place details
+                        const placeId = predictions[0].place_id;
 
-                let defaultStreet = '';
-                let defaultCity = '';
-                let defaultState = '';
-                let defaultCountry = '';
-                let defaultPostalcode = '';
-
-                // Check if the selected place's state and city are not in the disallowed lists
-                const cityComponent = place.address_components.find(component => component.types.includes('locality'));
-                const stateComponent = place.address_components.find(component => component.types.includes('administrative_area_level_1'));
-
-                if (cityComponent && stateComponent && !disallowedCities.includes(cityComponent.long_name) && !disallowedStates.includes(stateComponent.long_name)) {
-                    // The selected place's city and state are not in the disallowed lists
-                    // Loop through the address components to extract street, city, and state
-
-                    place.address_components.forEach((component) => {
-                        const types = component.types;
-                        if (types.includes('route')) {
-                            defaultStreet = component.long_name;
-                        } else if (types.includes('locality')) {
-                            defaultCity = component.long_name;
-                        } else if (types.includes('administrative_area_level_1')) {
-                            defaultState = component.long_name;
-                        } else if (types.includes('country')) {
-                            defaultCountry = component.long_name;
-                        } else if (types.includes('postal_code')) {
-                            defaultPostalcode = component.long_name;
-                        }
-                    });
-
-                    // Set values in your Frappe form fields
-
-					frappe.web_form.set_value('address_line1', place.name);
-                    frappe.web_form.set_value('address_line2', defaultStreet);
-                    frappe.web_form.set_value('city', defaultCity);
-                    frappe.web_form.set_value('state', defaultState);
-                    // frappe.web_form.set_value('country', defaultCountry);
-                    frappe.web_form.set_value('pincode', defaultPostalcode);
-
-					autocomplete.set('place', null);
-                } else {
-					frappe.msgprint("Entered city or state is not allowed.")
-					blankFields();
-				}
+                        // Use PlacesService to get details for the selected place
+                        const placesService = new google.maps.places.PlacesService(document.createElement('div'));
+                        placesService.getDetails({ placeId: placeId }, function (place, status) {
+                            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                                // Process the selected place and populate form fields
+                                const selectedState = place.address_components.find(component => component.types.includes('administrative_area_level_1')).long_name;
+                                const selectedCity = place.address_components.find(component => component.types.includes('locality')).long_name;
+								if (disallowedStates.includes(selectedState)) {
+                                    alert('Enter City or State is not allowed. Please choose a different one.');
+                                    return;
+                                }
+                                
+                                if (disallowedCities.includes(selectedCity)) {
+                                    alert('Enter City or State is not allowed. Please choose a different one.');
+                                    return
+                                }
+                                processSelectedPlace(place);
+                            } else {
+                                console.error('Error fetching place details:', status);
+                                // Handle error as needed
+                            }
+                        });
+                    } else {
+                        // No valid predictions, show an error
+                        alert("No valid address found. Please enter a valid address.");
+                    }
+                });
             });
         }
     }
 
-	function isValidPlace(place) {
-		return place && place.geometry && place.address_components && place.address_components.length > 0;
-	}
+    // Function to handle predictions
+    function handleAutocompletePredictions(predictions) {
+        // Process and display the predictions as needed
+        console.log('Autocomplete predictions:', predictions);
+        // Example: update a suggestion dropdown or display predictions in the UI
+    }
 
-    window.onload = initializeAutocomplete;
+    // Function to process the selected place and populate form fields
+    function processSelectedPlace(place) {
+
+        // Default values for form fields
+        let defaultStreet = '';
+        let defaultCity = '';
+        let defaultState = '';
+        let defaultPostalcode = '';
+
+        // Loop through the address components to extract street, city, and state
+        place.address_components.forEach((component) => {
+            const types = component.types;
+            if (types.includes('route')) {
+                defaultStreet = component.long_name;
+            } else if (types.includes('locality')) {
+                defaultCity = component.long_name;
+            } else if (types.includes('administrative_area_level_1')) {
+                defaultState = component.long_name;
+            } else if (types.includes('postal_code')) {
+                defaultPostalcode = component.long_name;
+            }
+        });
+
+		frappe.web_form.set_value('address_line1', place.name);
+        frappe.web_form.set_value('address_line2', defaultStreet);
+        frappe.web_form.set_value('city', defaultCity);
+        frappe.web_form.set_value('state', defaultState);
+        frappe.web_form.set_value('pincode', defaultPostalcode);
+    }
+
 </script>
 
 {% endblock %}
