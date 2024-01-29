@@ -232,12 +232,12 @@ frappe.init_client_script = () => {
                                 const selectedState = place.address_components.find(component => component.types.includes('administrative_area_level_1')).long_name;
                                 const selectedCity = place.address_components.find(component => component.types.includes('locality')).long_name;
 								if (disallowedStates.includes(selectedState)) {
-                                    alert('Enter City or State is not allowed. Please choose a different one.');
+                                    frappe.msgprint('Enter City or State is not allowed. Please choose a different one.');
                                     return;
                                 }
                                 
                                 if (disallowedCities.includes(selectedCity)) {
-                                    alert('Enter City or State is not allowed. Please choose a different one.');
+                                    frappe.msgprint('Enter City or State is not allowed. Please choose a different one.');
                                     return
                                 }
                                 processSelectedPlace(place);
@@ -248,7 +248,7 @@ frappe.init_client_script = () => {
                         });
                     } else {
                         // No valid predictions, show an error
-                        alert("No valid address found. Please enter a valid address.");
+                        frappe.msgprint("No valid address found. Please enter a valid address.");
                     }
                 });
             });
