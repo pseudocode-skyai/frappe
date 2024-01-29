@@ -173,6 +173,7 @@ frappe.init_client_script = () => {
             types: ['geocode'],
             componentRestrictions: { country: 'US' }
         });
+        let selectedPlace = null;
 
         if (searchAddressInput) {
 
@@ -203,10 +204,12 @@ frappe.init_client_script = () => {
 
                 autocomplete.addListener('place_changed', function() {
                     const place = autocomplete.getPlace();
+                    selectedPlace = place.formatted_address;
                     const addButton = document.getElementById('search-btn');
 
                     addButton.disabled = !place.formatted_address;
                 });
+                addButton.disabled = (searchAddressInput.value.trim() != selectedPlace)
             });
             // const place = autocomplete.getPlace();
         }
