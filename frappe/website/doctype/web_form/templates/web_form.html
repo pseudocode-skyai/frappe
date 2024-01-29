@@ -194,7 +194,7 @@ frappe.init_client_script = () => {
                         handleAutocompletePredictions(predictions);
                     } else {
                         // Handle errors or no predictions
-                        console.error('Autocomplete request failed:', status);
+                        // console.error('Autocomplete request failed:', status);
                     }
                 };
                 
@@ -202,7 +202,6 @@ frappe.init_client_script = () => {
                 autocompleteService.getPlacePredictions(autocompleteRequest, autocompleteCallback);
             });
             const place = autocomplete.getPlace();
-            console.log(place)
         }
 
         // Add click event handler for the "Add" button
@@ -242,7 +241,7 @@ frappe.init_client_script = () => {
                                 }
                                 processSelectedPlace(place);
                             } else {
-                                console.error('Error fetching place details:', status);
+                                // console.error('Error fetching place details:', status);
                                 // Handle error as needed
                             }
                         });
@@ -258,7 +257,7 @@ frappe.init_client_script = () => {
     // Function to handle predictions
     function handleAutocompletePredictions(predictions) {
         // Process and display the predictions as needed
-        console.log('Autocomplete predictions:', predictions);
+        // console.log('Autocomplete predictions:', predictions);
         // Example: update a suggestion dropdown or display predictions in the UI
     }
 
