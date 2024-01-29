@@ -48,7 +48,7 @@ data-web-form="{{ name }}" data-web-form-doctype="{{ doc_type }}" data-login-req
 					<div class="control-input-wrapper">
 						<div class="control-input" style="display: flex;">
 							<input type="text" id="google-search-address" class="input-with-feedback form-control mr-2" placeholder="" autocomplete="off" required>
-							<button id="search-btn" class="btn text-white">ADD</button>
+							<button id="search-btn" class="btn text-white" disabled>ADD</button>
 						</div>
 					</div>
 					<p style="font-size: 15px;color: red;">Search and Select here for add Address.</p>
@@ -163,12 +163,12 @@ frappe.init_client_script = () => {
     window.onload = initializeAutocomplete;
 
     const disallowedStates = ["Alabama", "Arkansas", "Indiana", "Vermont", "Wisconsin", "Rhode Island"];
-    const disallowedCities = ["Sarasota County Florida", "San Diego", "Jerseyville", "Denver"];
+    const disallowedCities = ["Sarasota", "San Diego", "Jerseyville", "Denver"];
 
     // Function to initialize Google Places Autocomplete
     function initializeAutocomplete() {
         const searchAddressInput = document.getElementById('google-search-address');
-        const autocompleteService = new google.maps.places.AutocompleteService();
+        const autocompleteService = new google.maps.places.AutocompleteService(searchAddressInput);
         const autocomplete = new google.maps.places.Autocomplete(searchAddressInput, {
             types: ['geocode'],
             componentRestrictions: { country: 'US' }
@@ -200,8 +200,15 @@ frappe.init_client_script = () => {
                 
                 // Make the autocomplete request
                 autocompleteService.getPlacePredictions(autocompleteRequest, autocompleteCallback);
+
+                autocomplete.addListener('place_changed', function() {
+                    const place = autocomplete.getPlace();
+                    const addButton = document.getElementById('search-btn');
+
+                    addButton.disabled = !place.formatted_address;
+                });
             });
-            const place = autocomplete.getPlace();
+            // const place = autocomplete.getPlace();
         }
 
         // Add click event handler for the "Add" button
@@ -237,7 +244,7 @@ frappe.init_client_script = () => {
                                 
                                 if (disallowedCities.includes(selectedCity)) {
                                     frappe.msgprint('Enter City or State is not allowed. Please choose a different one.');
-                                    return
+                                    return;
                                 }
                                 processSelectedPlace(place);
                             } else {
