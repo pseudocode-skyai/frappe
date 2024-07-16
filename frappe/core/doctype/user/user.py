@@ -56,6 +56,62 @@ class User(Document):
 
 		self.set_onload("all_modules", [m.get("module_name") for m in get_modules_from_all_apps()])
 
+	@frappe.whitelist()
+	def create_address(self):
+		address_fields = [
+			"address_type",
+			"address_title",
+			"address_line1",
+			"address_line2",
+			"city",
+			"county",
+			"state",
+			"country",
+			"pincode",
+		]
+		info_fields = ["email_id", "phone", "fax"]
+
+		# do not create an address if no fields are available,
+		# skipping country since the system auto-sets it from system defaults
+		address = frappe.new_doc("Address")
+		address.email_id=self.email
+		address.phone=self.mobile_no
+		address.contact_name=self.first_name+" "+self.last_name
+
+		address.update({addr_field: self.get(addr_field) for addr_field in address_fields})
+		address.append("links", {"link_doctype": "User", "link_name": self.name})
+		address.insert()
+
+		return address
+
+	@frappe.whitelist()
+	def update_address(self,address=None):
+		address_fields = [
+			"address_type",
+			"address_title",
+			"address_line1",
+			"address_line2",
+			"city",
+			"county",
+			"state",
+			"country",
+			"pincode",
+		]
+		info_fields = ["email_id", "phone", "fax"]
+
+		# do not create an address if no fields are available,
+		# skipping country since the system auto-sets it from system defaults
+		address = frappe.get_doc("Address",address)
+		address.email_id=self.email
+		address.phone=self.mobile_no
+		address.contact_name=self.first_name+" "+self.last_name
+
+		address.update({addr_field: self.get(addr_field) for addr_field in address_fields})
+		address.append("links", {"link_doctype": "User", "link_name": self.name})
+		address.save()
+
+		return address
+
 	def before_insert(self):
 		self.flags.in_insert = True
 		throttle_user_creation()

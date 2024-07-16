@@ -87,7 +87,7 @@ frappe.ui.form.on('User', {
 			frm.reload_doc();
 			return;
 		}
-
+		frm.events.user_address(frm);
 		if(doc.name===frappe.session.user && !doc.__unsaved
 			&& frappe.all_timezones
 			&& (doc.language || frappe.boot.user.language)
@@ -218,6 +218,58 @@ frappe.ui.form.on('User', {
 	validate: function(frm) {
 		if(frm.roles_editor) {
 			frm.roles_editor.set_roles_in_table();
+		}
+	},
+	user_address: function(frm){
+		if (frm.doc.user_address) {
+			frappe.call({
+				method: 'frappe.contacts.doctype.address.address.get_address_display',
+				args: {
+					"address_dict": frm.doc.user_address
+				},
+				callback: function(r) {
+					var doc = r.message.replace(/<br>/g, '\n')
+
+					frm.set_value("address_details", doc);
+					// frm.set_value("address_details", r.message);
+				}
+			});
+		}
+	},
+	after_save:function(frm){
+		if (!frm.doc.user_address) {
+			frappe.call({
+				method: 'create_address',
+				doc:frm.doc,
+				callback: function(r) {
+					console.log(r.message.name)
+					setTimeout(() => {
+						frm.set_value("user_address", r.message.name);
+						frm.events.user_address(frm);
+						frm.save()
+					}, 500);
+					
+				}
+			});
+		}
+		if (frm.doc.user_address) {
+			frappe.call({
+				method: 'update_address',
+				args: {
+					"address": frm.doc.user_address
+				},
+				doc:frm.doc,
+				callback: function(r) {
+					console.log(r.message.name)
+					setTimeout(() => {
+						frm.set_value("user_address", r.message.name);
+						frm.events.user_address(frm);
+						// frm.set_df_property('user_address_section',"hidden",1);
+						frm.save()
+					}, 500);
+					
+				}
+			});
 		}
 	},
 	enabled: function(frm) {
