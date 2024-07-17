@@ -112,7 +112,7 @@ export default class ChartWidget extends Widget {
 			}
 			frappe.run_serially([
 				() => this.prepare_chart_object(),
-				() => this.setup_filter_button(),
+				// () => this.setup_filter_button(),
 				() => this.fetch_and_update_chart(),
 			]);
 		});
@@ -303,7 +303,7 @@ export default class ChartWidget extends Widget {
 					this.make_chart();
 				}
 			},
-			{
+			/* {
 				label: __("Edit"),
 				action: "action-edit",
 				handler: () => {
@@ -313,8 +313,8 @@ export default class ChartWidget extends Widget {
 						this.chart_doc.name
 					);
 				}
-			},
-			{
+			}, */
+			/* {
 				label: __("Reset Chart"),
 				action: "action-reset",
 				handler: () => {
@@ -322,10 +322,10 @@ export default class ChartWidget extends Widget {
 					delete this.dashboard_chart;
 					this.make_chart();
 				}
-			}
+			} */
 		];
 
-		if (this.chart_doc.document_type) {
+		/* if (this.chart_doc.document_type) {
 			actions.push({
 				label: __("{0} List", [this.chart_doc.document_type]),
 				action: "action-list",
@@ -345,7 +345,7 @@ export default class ChartWidget extends Widget {
 					);
 				}
 			});
-		}
+		} */
 		this.set_chart_actions(actions);
 	}
 
