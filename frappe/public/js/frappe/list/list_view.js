@@ -1808,13 +1808,13 @@ frappe.views.ListView = class ListView extends frappe.views.BaseList {
 			frappe.model.can_cancel(doctype) &&
 			!frappe.model.has_workflow(doctype)
 		) {
-			actions_menu_items.push(bulk_cancel());
 		} */
-
+		
 		// bulk delete
-		// if (frappe.model.can_delete(doctype)) {
-		// 	actions_menu_items.push(bulk_delete());
-		// }
+		if (frappe.model.can_delete(doctype)) {
+			actions_menu_items.push(bulk_cancel());
+			actions_menu_items.push(bulk_delete());
+		}
 
 		return actions_menu_items;
 	}

@@ -68,7 +68,7 @@ class Dashboard {
 				title = __('{0} Dashboard', [title]);
 			}
 			this.page.set_title(title);
-			this.set_dropdown();
+			// this.set_dropdown();
 			this.container.empty();
 			this.refresh();
 		}
