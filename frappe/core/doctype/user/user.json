@@ -94,7 +94,8 @@
   "api_key",
   "generate_keys",
   "column_break_65",
-  "api_secret"
+  "api_secret",
+  "otp"
  ],
  "fields": [
   {
@@ -702,6 +703,12 @@
    "fieldname": "address_line2",
    "fieldtype": "Data",
    "label": "Address Line 2"
+  },
+  {
+   "fieldname": "otp",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "OTP"
   }
  ],
  "hide_toolbar": 1,
@@ -765,7 +772,7 @@
    "link_fieldname": "user"
   }
  ],
- "modified": "2024-07-12 07:35:23.924421",
+ "modified": "2024-07-18 01:53:50.213585",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "User",

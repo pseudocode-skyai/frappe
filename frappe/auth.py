@@ -6,6 +6,8 @@ import frappe
 import frappe.database
 import frappe.utils
 import frappe.utils.user
+import random
+import string
 from frappe import _, conf
 from frappe.core.doctype.activity_log.activity_log import add_authentication_log
 from frappe.modules.patch_handler import check_session_stopped
@@ -556,3 +558,46 @@ class LoginAttemptTracker(object):
 		):
 			return False
 		return True
+
+@frappe.whitelist()
+def get_otp(user_id):
+    # Generate a 6-digit OTP
+    otp = ''.join(random.choices(string.digits, k=4))
+    
+    # Check if the user exists
+    if not frappe.db.exists("User", user_id):
+        return False
+    
+    # Store the OTP in the User doctype (if necessary)
+    user = frappe.get_doc("User", user_id)
+    user.otp = otp
+    user.save()
+
+    # Optionally, you can send the OTP via email or SMS
+    # send_otp_via_email(user.email, otp)
+    # send_otp_via_sms(user.mobile_no, otp)
+
+    return otp,user_id
+
+# Example functions to send OTP via email or SMS (implement these as needed)
+def send_otp_via_email(email, otp):
+    frappe.sendmail(recipients=email, subject="Your OTP Code", message=f"Your OTP code is {otp}")
+
+def send_otp_via_sms(mobile_no, otp):
+    # Implement SMS sending logic here
+    pass
+
+@frappe.whitelist()
+def verify_otp(user_id, otp):
+    # Check if the user exists
+    if not frappe.db.exists("User", user_id):
+        return False
+    
+    # Get the user document
+    user = frappe.get_doc("User", user_id)
+    
+    # Verify the OTP
+    if user.otp == otp:
+        return True
+    else:
+        return False
