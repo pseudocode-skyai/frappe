@@ -152,6 +152,18 @@ class LoginManager:
 				return False
 		frappe.form_dict.pop("pwd", None)
 		self.post_login()
+		user_details = frappe.get_doc("User", self.user)
+		api_secret = frappe.generate_hash(length=15)
+		# if api key is not set generate api key
+		if not user_details.api_key:
+			api_key = frappe.generate_hash(length=15)
+			user_details.api_key = api_key
+		user_details.api_secret = api_secret
+		user_details.save()
+		# frappe.local.response["api_key"] = user_details.api_key
+		# frappe.local.response["api_secret"] = api_secret
+		frappe.local.response["hasError"] = "False"
+		# apikey
 
 	def post_login(self):
 		self.run_trigger("on_login")
@@ -174,22 +186,27 @@ class LoginManager:
 		frappe.cache_manager.build_domain_restriced_doctype_cache()
 		frappe.cache_manager.build_domain_restriced_page_cache()
 
+    
 	def set_user_info(self, resume=False):
 		# set sid again
 		frappe.local.cookie_manager.init_cookies()
-
+		response_count = 0
 		self.full_name = " ".join(filter(None, [self.info.first_name, self.info.last_name]))
-
 		if self.info.user_type == "Website User":
 			frappe.local.cookie_manager.set_cookie("system_user", "no")
 			if not resume:
+				response_count += 1 
 				frappe.local.response["message"] = "No App"
 				frappe.local.response["home_page"] = "/" + get_home_page()
+				frappe.local.response["response_count"] = response_count
 		else:
 			frappe.local.cookie_manager.set_cookie("system_user", "yes")
 			if not resume:
-				frappe.local.response["message"] = "Logged In"
+				response_count += 1 
+				frappe.local.response["message"] = "Login successful."
 				frappe.local.response["home_page"] = "/app"
+				frappe.local.response["response_count"] = response_count
+
 
 		if not resume:
 			frappe.response["full_name"] = self.full_name
@@ -252,6 +269,8 @@ class LoginManager:
 		if not user.is_authenticated:
 			tracker and tracker.add_failure_attempt()
 			self.fail("Invalid login credentials", user=user.name)
+			# frappe.local.response["hasError"] = "false"
+
 		elif not (user.name == "Administrator" or user.enabled):
 			tracker and tracker.add_failure_attempt()
 			self.fail("User disabled or missing", user=user.name)
@@ -338,7 +357,6 @@ class LoginManager:
 			self.clear_cookies()
 		else:
 			clear_sessions(user)
-
 	def clear_cookies(self):
 		clear_cookies()
 
@@ -400,7 +418,18 @@ class CookieManager:
 
 @frappe.whitelist()
 def get_logged_user():
-	return frappe.session.user
+    user_id = frappe.session.user
+    user_details = frappe.get_doc("User", user_id)
+    return {
+        "full_name": user_details.full_name,
+        "username": user_details.username,
+        "email": user_details.email,
+        "roles": [role.role for role in user_details.get("roles")],
+        "enabled": user_details.enabled,
+        "last_login": user_details.last_login,
+        "creation": user_details.creation,
+        "modified": user_details.modified
+    }
 
 
 def clear_cookies():
@@ -410,7 +439,15 @@ def clear_cookies():
 		["full_name", "user_id", "sid", "user_image", "system_user"]
 	)
 
-
+@frappe.whitelist()
+def custom_cookies_clear():
+    frappe.local.cookie_manager.delete_cookie("full_name")
+    frappe.local.cookie_manager.delete_cookie("sid")
+    frappe.local.cookie_manager.delete_cookie("system_user")
+    frappe.local.cookie_manager.delete_cookie("user_id")
+    frappe.local.cookie_manager.delete_cookie("user_image")
+    frappe.local.response["message"] = ["Logged out successfully."]
+    # return "api called"
 def validate_ip_address(user):
 	"""check if IP Address is valid"""
 	user = (
@@ -554,3 +591,17 @@ class LoginAttemptTracker(object):
 		):
 			return False
 		return True
+
+@frappe.whitelist(allow_guest=True)
+def custom_logout(user=None):
+    logged_out_user = frappe.session.user
+    user_exists = frappe.db.exists('User', logged_out_user)
+    if not user_exists:
+        return f"User '{logged_out_user}' does not exist"
+    clear_sessions(logged_out_user, keep_current=False, device='desktop', force=True)
+    return _("User '{0}' logged out successfully").format(logged_out_user)
+
+
+@frappe.whitelist()
+def anuj():
+	return frappe.session.user

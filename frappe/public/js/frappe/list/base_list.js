@@ -788,24 +788,32 @@ class FilterArea {
 	get_standard_filters() {
 		const filters = [];
 		const fields_dict = this.list_view.page.fields_dict;
+	
 		for (let key in fields_dict) {
-			let field = fields_dict[key];
-			let value = field.get_value();
-			if (value) {
-				if (field.df.condition === "like" && !value.includes("%")) {
-					value = "%" + value + "%";
-				}
-				filters.push([
-					this.list_view.doctype,
-					field.df.fieldname,
-					field.df.condition || "=",
-					value,
-				]);
+			const field = fields_dict[key];
+			const value = field.get_value();
+			
+			if (typeof value === 'string' || value instanceof String) {
+				// Split the search query into individual words
+				const words = value.split(' ');
+	
+				// Create a filter for each word for the current field
+				words.forEach(word => {
+					if (word) {
+						filters.push([
+							this.list_view.doctype,
+							field.df.fieldname,
+							'like',
+							'%' + word + '%',
+						]);
+					}
+				});
 			}
 		}
-
+	
 		return filters;
 	}
+	
 
 	make_filter_list() {
 		$(`<div class="filter-selector">
